@@ -1,0 +1,2115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Manufacturing – Smart Factory Monitor Simulation</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800&family=Share+Tech+Mono&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      /* LIQUID GLASS LIGHT THEME */
+      --bg: #f0f4ff;
+      --panel: rgba(255, 255, 255, 0.10);
+      --panel2: rgba(255, 255, 255, 0.18);
+      --border: rgba(255, 255, 255, 0.80);
+      --accent: #007aff;
+      --accent2: #34c759;
+      --warn: #ff3b30;
+      --warn2: #ff9500;
+      --text: #000000;
+      --text2: #8e8e93;
+      --glow: 0 20px 80px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.04), inset 0 1.5px 0 rgba(255, 255, 255, 1), inset 0 -1px 0 rgba(255, 255, 255, 0.20), inset 1.5px 0 0 rgba(255, 255, 255, 0.55), inset -1.5px 0 0 rgba(255, 255, 255, 0.55);
+      --glow-red: 0 20px 80px rgba(255, 59, 48, 0.18);
+      --panel-blur: blur(60px) saturate(280%) brightness(106%);
+    }
+
+    body.dark-mode {
+      /* LIQUID GLASS DARK THEME */
+      --bg: #000000;
+      --panel: rgba(255, 255, 255, 0.05);
+      --panel2: rgba(255, 255, 255, 0.08);
+      --border: rgba(255, 255, 255, 0.14);
+      --accent: #0a84ff;
+      --accent2: #30d158;
+      --warn: #ff453a;
+      --warn2: #ff9f0a;
+      --text: #ffffff;
+      --text2: #98989d;
+      --glow: 0 20px 80px rgba(0, 0, 0, 0.50), 0 4px 16px rgba(0, 0, 0, 0.30), inset 0 1.5px 0 rgba(255, 255, 255, 0.16), inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+      --glow-red: 0 20px 80px rgba(255, 69, 58, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background-color 0.5s ease, color 0.5s ease;
+    }
+
+    /* ── APPLE STYLE FLUID GRADIENT MESH BACKGROUND ── */
+    .mesh-container {
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 15% 25%, rgba(0, 122, 255, 0.42) 0%, transparent 45%),
+        radial-gradient(circle at 85% 15%, rgba(175, 82, 222, 0.36) 0%, transparent 45%),
+        radial-gradient(circle at 35% 78%, rgba(52, 199, 89, 0.30) 0%, transparent 40%),
+        radial-gradient(circle at 78% 78%, rgba(255, 45, 85, 0.26) 0%, transparent 40%),
+        radial-gradient(circle at 55% 45%, rgba(255, 149, 0, 0.18) 0%, transparent 50%);
+      filter: blur(80px);
+      animation: meshFlow 25s infinite alternate ease-in-out;
+    }
+
+    body.dark-mode .mesh-container {
+      background:
+        radial-gradient(circle at 15% 25%, rgba(10, 132, 255, 0.38) 0%, transparent 45%),
+        radial-gradient(circle at 85% 15%, rgba(191, 90, 242, 0.32) 0%, transparent 45%),
+        radial-gradient(circle at 35% 78%, rgba(48, 209, 88, 0.26) 0%, transparent 40%),
+        radial-gradient(circle at 78% 78%, rgba(255, 55, 95, 0.22) 0%, transparent 40%),
+        radial-gradient(circle at 55% 45%, rgba(255, 159, 10, 0.16) 0%, transparent 50%);
+      filter: blur(100px);
+    }
+
+    @keyframes meshFlow {
+      0% {
+        transform: rotate(0deg) scale(1);
+      }
+
+      100% {
+        transform: rotate(10deg) scale(1.1);
+      }
+    }
+
+    .all-wrap {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── NAVIGATION ── */
+    nav {
+      position: sticky;
+      top: 12px;
+      z-index: 100;
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      border-radius: 50px;
+      height: 64px;
+      background: rgba(255, 255, 255, 0.72);
+      -webkit-backdrop-filter: blur(40px) saturate(200%);
+      backdrop-filter: blur(40px) saturate(200%);
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      box-shadow: 0 12px 48px rgba(20, 20, 50, 0.09), 0 2px 8px rgba(20, 20, 50, 0.06), inset 0 1px 1.5px rgba(255, 255, 255, 0.9);
+      transition: all 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    body.dark-mode nav {
+      background: rgba(18, 18, 30, 0.82);
+      border-color: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+    }
+
+    .nav-btn {
+      text-decoration: none;
+      background: transparent;
+      border: none;
+      color: var(--text2);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 24px;
+      cursor: pointer;
+      transition: all 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .nav-btn:hover,
+    .nav-btn.active {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    body.dark-mode .nav-btn:hover,
+    body.dark-mode .nav-btn.active {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .nav-btn.ai-btn {
+      color: #af52de !important;
+      background: rgba(175, 82, 222, 0.1) !important;
+      font-weight: 600;
+    }
+
+    .theme-toggle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      background: rgba(255, 255, 255, 0.5);
+      cursor: pointer;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+      color: var(--text);
+      padding: 0;
+      margin-left: 0;
+      flex-shrink: 0;
+    }
+
+    body.dark-mode .theme-toggle {
+      border-color: rgba(255, 255, 255, 0.08);
+      background: rgba(18, 18, 30, 0.7);
+    }
+
+    .theme-toggle:hover {
+      transform: rotate(20deg);
+    }
+
+    /* ── PAGE HERO ── */
+    .page-hero {
+      text-align: center;
+      padding: 2.5rem 2rem 2rem;
+      border-radius: 32px;
+      margin: 1rem auto 0;
+      max-width: 1100px;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(40px) saturate(180%);
+      -webkit-backdrop-filter: blur(40px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+    }
+
+    body.dark-mode .page-hero {
+      background: rgba(30, 30, 30, 0.6);
+      border-color: rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+    }
+
+    .page-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(0, 122, 255, 0.06) 0%, rgba(175, 82, 222, 0.05) 50%, rgba(52, 199, 89, 0.05) 100%);
+      border-radius: inherit;
+      pointer-events: none;
+    }
+
+    .page-hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 18px;
+      border-radius: 30px;
+      background: rgba(0, 122, 255, 0.1);
+      border: 1px solid rgba(0, 122, 255, 0.22);
+      color: var(--accent);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    body.dark-mode .page-hero-badge {
+      background: rgba(10, 132, 255, 0.15);
+      border-color: rgba(10, 132, 255, 0.3);
+    }
+
+    .page-hero-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent2);
+      animation: heroDotPulse 1.5s infinite;
+      display: inline-block;
+    }
+
+    @keyframes heroDotPulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+
+      50% {
+        transform: scale(1.6);
+        opacity: 0.5;
+      }
+    }
+
+    .page-hero-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -1.5px;
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+
+    .page-hero-title em {
+      font-style: normal;
+      background: linear-gradient(135deg, #007aff 0%, #af52de 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .page-hero-sub {
+      color: var(--text2);
+      font-size: 1.05rem;
+      max-width: 620px;
+      margin: 0 auto 1.75rem;
+      font-weight: 500;
+    }
+
+    .page-hero-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .hero-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 18px;
+      border-radius: 30px;
+      background: rgba(255, 255, 255, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      transition: all 0.3s ease;
+    }
+
+    body.dark-mode .hero-pill {
+      background: rgba(40, 40, 40, 0.6);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .hero-pill:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    /* HEADER */
+    header {
+      background: var(--panel);
+      backdrop-filter: var(--panel-blur);
+      -webkit-backdrop-filter: var(--panel-blur);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      position: relative;
+      z-index: 90;
+      transition: all 0.5s ease;
+    }
+
+    .logo-box {
+      width: 44px;
+      height: 44px;
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--glow);
+      animation: pulse-border 2s infinite;
+    }
+
+    @keyframes pulse-border {
+
+      0%,
+      100% {
+        box-shadow: var(--glow)
+      }
+
+      50% {
+        box-shadow: 0 0 20px var(--accent)
+      }
+    }
+
+    .logo-box svg {
+      width: 26px;
+      height: 26px;
+    }
+
+    .header-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 2px;
+    }
+
+    .header-sub {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: var(--text2);
+      letter-spacing: 1px;
+      margin-top: 2px;
+    }
+
+    .header-spacer {
+      flex: 1;
+    }
+
+    .sim-time {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 13px;
+      color: var(--accent2);
+      background: rgba(52, 199, 89, 0.1);
+      border: 1px solid rgba(52, 199, 89, 0.3);
+      border-radius: 8px;
+      padding: 6px 14px;
+    }
+
+    .status-pill {
+      padding: 5px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: 'Outfit', sans-serif;
+      letter-spacing: 1px;
+      transition: all 0.4s;
+    }
+
+    .status-pill.ok {
+      background: rgba(52, 199, 89, 0.15);
+      border: 1px solid var(--accent2);
+      color: var(--accent2);
+    }
+
+    .status-pill.err {
+      background: rgba(255, 59, 48, 0.15);
+      border: 1px solid var(--warn);
+      color: var(--warn);
+      animation: blink-pill 0.6s infinite;
+    }
+
+    @keyframes blink-pill {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: 0.5
+      }
+    }
+
+    .theme-toggle-btn {
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+
+    .theme-toggle-btn:hover {
+      background: var(--border);
+    }
+
+    /* CONTROLS BAR */
+    .controls-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 12px 24px;
+      background: var(--panel);
+      backdrop-filter: var(--panel-blur);
+      border: 1px solid var(--border);
+      border-radius: 30px;
+    }
+
+    .ctrl-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: var(--text2);
+    }
+
+    .ctrl-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ctrl-group label {
+      font-size: 12px;
+      color: var(--text2);
+    }
+
+    .ctrl-group input[type=range] {
+      accent-color: var(--accent);
+      width: 100px;
+    }
+
+    .ctrl-group select,
+    .ctrl-group input[type=number] {
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 4px 8px;
+      font-size: 12px;
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    .btn {
+      padding: 7px 18px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: 'Outfit', sans-serif;
+      letter-spacing: 1px;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      box-shadow: var(--glow);
+      transform: translateY(-1px);
+    }
+
+    .btn-danger {
+      background: var(--warn);
+      color: #fff;
+    }
+
+    .btn-success {
+      background: var(--accent2);
+      color: #fff;
+    }
+
+    .btn-outline {
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* MAIN GRID */
+    .main-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      padding: 20px 24px;
+    }
+
+    .main-bottom {
+      display: grid;
+      grid-template-columns: 1.4fr 1.2fr;
+      gap: 16px;
+      padding: 0 24px 20px;
+    }
+
+    /* METRIC CARDS */
+    .metric-card {
+      background: var(--panel);
+      backdrop-filter: var(--panel-blur);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      position: relative;
+      overflow: hidden;
+      transition: box-shadow 0.3s;
+      box-shadow: var(--glow);
+    }
+
+    .metric-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--accent);
+      transition: background 0.3s;
+    }
+
+    .metric-card.warn::before {
+      background: var(--warn);
+    }
+
+    .metric-card.warn {
+      border-color: rgba(255, 59, 48, 0.4);
+      box-shadow: var(--glow-red);
+      animation: shake-card 0.3s;
+    }
+
+    @keyframes shake-card {
+
+      0%,
+      100% {
+        transform: translateX(0)
+      }
+
+      25% {
+        transform: translateX(-4px)
+      }
+
+      75% {
+        transform: translateX(4px)
+      }
+    }
+
+    .metric-label {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--text2);
+      font-family: 'Share Tech Mono', monospace;
+      margin-bottom: 8px;
+    }
+
+    .metric-value {
+      font-family: 'Outfit', sans-serif;
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1;
+      transition: color 0.3s;
+    }
+
+    .metric-value.warn {
+      color: var(--warn);
+    }
+
+    .metric-unit {
+      font-size: 12px;
+      color: var(--text2);
+      margin-top: 4px;
+    }
+
+    .metric-bar {
+      margin-top: 12px;
+      height: 4px;
+      background: rgba(128, 128, 128, 0.2);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .metric-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: var(--accent);
+      transition: width 0.5s, background 0.3s;
+    }
+
+    .metric-bar-fill.warn {
+      background: var(--warn);
+    }
+
+    .metric-trend {
+      font-size: 11px;
+      margin-top: 6px;
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    .trend-up {
+      color: var(--accent2);
+    }
+
+    .trend-down {
+      color: var(--warn);
+    }
+
+    /* CHART CARDS */
+    .chart-card {
+      background: var(--panel);
+      backdrop-filter: var(--panel-blur);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      position: relative;
+      box-shadow: var(--glow);
+    }
+
+    .chart-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--text2);
+      margin-bottom: 14px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .chart-title .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent2);
+      animation: blink-dot 1s infinite;
+    }
+
+    @keyframes blink-dot {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: 0.2
+      }
+    }
+
+    .chart-wrap {
+      position: relative;
+    }
+
+    /* MACHINE VISUALIZATION */
+    .machine-viz {
+      grid-column: span 2;
+      background: var(--panel);
+      backdrop-filter: var(--panel-blur);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: var(--glow);
+    }
+
+    .factory-floor {
+      display: flex;
+      gap: 16px;
+      align-items: flex-end;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 20px 10px;
+      min-height: 160px;
+    }
+
+    .machine-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      flex: 0 0 80px;
+    }
+
+    .machine-body {
+      width: 70px;
+      height: 80px;
+      background: var(--panel2);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s, box-shadow 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .machine-body.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 12px rgba(0, 122, 255, 0.3);
+    }
+
+    .machine-body.fault {
+      border-color: var(--warn);
+      box-shadow: 0 0 12px rgba(255, 59, 48, 0.5);
+      animation: fault-pulse 0.5s infinite;
+    }
+
+    @keyframes fault-pulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 12px rgba(255, 59, 48, 0.5)
+      }
+
+      50% {
+        box-shadow: 0 0 24px rgba(255, 59, 48, 0.9)
+      }
+    }
+
+    .machine-body.idle {
+      border-color: var(--warn2);
+    }
+
+    .gear-svg {
+      width: 40px;
+      height: 40px;
+    }
+
+    .gear-svg.spinning {
+      animation: spin 2s linear infinite;
+    }
+
+    .gear-svg.slow {
+      animation: spin 5s linear infinite;
+    }
+
+    .gear-svg.stopped {
+      animation: none;
+    }
+
+    @keyframes spin {
+      from {
+        transform: rotate(0deg)
+      }
+
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    .machine-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      position: absolute;
+      top: 6px;
+      right: 6px;
+    }
+
+    .ind-green {
+      background: var(--accent2);
+      box-shadow: 0 0 6px var(--accent2);
+    }
+
+    .ind-red {
+      background: var(--warn);
+      box-shadow: 0 0 6px var(--warn);
+      animation: blink-dot 0.4s infinite;
+    }
+
+    .ind-yellow {
+      background: var(--warn2);
+      box-shadow: 0 0 6px var(--warn2);
+    }
+
+    .machine-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: var(--text2);
+      text-align: center;
+    }
+
+    .machine-health-bar {
+      width: 70px;
+      height: 6px;
+      background: rgba(128, 128, 128, 0.2);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .machine-health-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.5s, background 0.3s;
+    }
+
+    /* ALERT LOG */
+    .alert-log {
+      background: var(--panel);
+      backdrop-filter: var(--panel-blur);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      max-height: 300px;
+      box-shadow: var(--glow);
+    }
+
+    .alert-log-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--text2);
+      margin-bottom: 12px;
+    }
+
+    .alert-list {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .alert-list::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .alert-list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .alert-list::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 2px;
+    }
+
+    .alert-item {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      animation: slide-in 0.3s ease;
+      border-left: 3px solid;
+      color: var(--text);
+    }
+
+    @keyframes slide-in {
+      from {
+        transform: translateX(-10px);
+        opacity: 0
+      }
+
+      to {
+        transform: none;
+        opacity: 1
+      }
+    }
+
+    .alert-item.error {
+      background: rgba(255, 59, 48, 0.1);
+      border-color: var(--warn);
+    }
+
+    .alert-item.warn {
+      background: rgba(255, 149, 0, 0.1);
+      border-color: var(--warn2);
+    }
+
+    .alert-item.ok {
+      background: rgba(52, 199, 89, 0.1);
+      border-color: var(--accent2);
+    }
+
+    .alert-item.info {
+      background: rgba(0, 122, 255, 0.1);
+      border-color: var(--accent);
+    }
+
+    .alert-time {
+      color: var(--text2);
+      margin-right: 8px;
+    }
+
+    /* OEE PANEL */
+    .oee-panel {
+      background: var(--panel);
+      backdrop-filter: var(--panel-blur);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: var(--glow);
+    }
+
+    .oee-ring-wrap {
+      display: flex;
+      justify-content: center;
+      margin: 10px 0;
+    }
+
+    .oee-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .oee-stat {
+      text-align: center;
+    }
+
+    .oee-stat-val {
+      font-family: 'Outfit', sans-serif;
+      font-size: 18px;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .oee-stat-lbl {
+      font-size: 10px;
+      color: var(--text2);
+      font-family: 'Share Tech Mono', monospace;
+      letter-spacing: 1px;
+    }
+
+    /* ── GRAY TEXT OVERRIDES for chart/section headings ── */
+    .chart-title,
+    .alert-log-title,
+    .oee-stat-lbl,
+    .kpi-label,
+    .metric-label,
+    .metric-unit,
+    .machine-label,
+    .ctrl-label,
+    .energy-label,
+    .pred-table th {
+      color: var(--text2) !important;
+    }
+
+    /* KPI ROW */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      padding: 0 24px 20px;
+    }
+
+    .kpi-card {
+      background: var(--panel);
+      backdrop-filter: var(--panel-blur);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: var(--glow);
+    }
+
+    .kpi-icon {
+      font-size: 28px;
+    }
+
+    .kpi-label {
+      font-size: 11px;
+      color: var(--text2);
+      font-family: 'Share Tech Mono', monospace;
+      letter-spacing: 1px;
+    }
+
+    .kpi-value {
+      font-family: 'Outfit', sans-serif;
+      font-size: 20px;
+      color: var(--accent2);
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    /* NOTIFICATION BANNER */
+    .notif-banner {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      max-width: 360px;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .notif {
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      animation: notif-in 0.4s ease, notif-out 0.4s ease 3.6s forwards;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      backdrop-filter: blur(20px);
+    }
+
+    @keyframes notif-in {
+      from {
+        transform: translateX(100px);
+        opacity: 0
+      }
+
+      to {
+        transform: none;
+        opacity: 1
+      }
+    }
+
+    @keyframes notif-out {
+      from {
+        opacity: 1
+      }
+
+      to {
+        opacity: 0;
+        transform: translateX(60px)
+      }
+    }
+
+    .notif.error {
+      background: rgba(255, 59, 48, 0.8);
+      border: 1px solid var(--warn);
+      color: #fff;
+    }
+
+    .notif.clear {
+      background: rgba(52, 199, 89, 0.8);
+      border: 1px solid var(--accent2);
+      color: #fff;
+    }
+
+    .notif-icon {
+      font-size: 18px;
+    }
+
+    /* PREDICTION TABLE */
+    .pred-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+    }
+
+    .pred-table th {
+      color: var(--text2);
+      text-align: left;
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--border);
+      letter-spacing: 1px;
+    }
+
+    .pred-table td {
+      padding: 7px 10px;
+      border-bottom: 1px solid rgba(128, 128, 128, 0.1);
+      color: var(--text);
+    }
+
+    .pred-table tr:hover td {
+      background: rgba(0, 122, 255, 0.05);
+    }
+
+    .risk-low {
+      color: var(--accent2);
+    }
+
+    .risk-med {
+      color: var(--warn2);
+    }
+
+    .risk-high {
+      color: var(--warn);
+      font-weight: bold;
+    }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(128, 128, 128, 0.5);
+      border-radius: 3px;
+    }
+
+    /* ENERGY FLOW */
+    .energy-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .energy-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: var(--text2);
+      width: 80px;
+    }
+
+    .energy-bar-bg {
+      flex: 1;
+      height: 10px;
+      background: rgba(128, 128, 128, 0.2);
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .energy-bar-fill {
+      height: 100%;
+      border-radius: 5px;
+      transition: width 0.6s;
+    }
+
+    .energy-val {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: var(--text);
+      width: 50px;
+      text-align: right;
+    }
+
+
+    /* Responsive */
+    @media(max-width:900px) {
+      .main-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .main-bottom {
+        grid-template-columns: 1fr;
+      }
+
+      .kpi-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ── FOOTER ── */
+    .foot {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text2);
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-top: 5rem;
+      border-radius: 40px 40px 0 0;
+      background: rgba(255, 255, 255, 0.10);
+      backdrop-filter: blur(60px) saturate(280%) brightness(106%);
+      -webkit-backdrop-filter: blur(60px) saturate(280%) brightness(106%);
+      border: 1px solid rgba(255, 255, 255, 0.80);
+      box-shadow: 0 20px 80px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.04), inset 0 1.5px 0 rgba(255, 255, 255, 1), inset 0 -1px 0 rgba(255, 255, 255, 0.20), inset 1.5px 0 0 rgba(255, 255, 255, 0.55), inset -1.5px 0 0 rgba(255, 255, 255, 0.55);
+      transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    body.dark-mode .foot {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow: 0 20px 80px rgba(0, 0, 0, 0.50), 0 4px 16px rgba(0, 0, 0, 0.30), inset 0 1.5px 0 rgba(255, 255, 255, 0.16), inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+    }
+
+    .all-wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="mesh-container"></div>
+
+  <!-- NAV -->
+  <div style="padding: 12px 20px; position: relative; z-index: 200;">
+    <nav>
+      <div style="width: 42px;"></div>
+      <div class="nav-links">
+        <a href="index.html" class="nav-btn" id="nav-home">Home</a>
+        <a href="problem.html" class="nav-btn" id="nav-problem">Problem</a>
+        <a href="objectives.html" class="nav-btn" id="nav-objectives">Objectives</a>
+        <a href="architecture.html" class="nav-btn" id="nav-architecture">Architecture</a>
+        <a href="simulation.html" class="nav-btn active" id="nav-simulation">Live Demo</a>
+        <a href="results.html" class="nav-btn" id="nav-results">Results &amp; ROI</a>
+        <a href="tech.html" class="nav-btn" id="nav-tech">Tech Stack</a>
+        <a href="ai-guide.html" class="nav-btn ai-btn" id="nav-ai-guide">🧠 AI Guide</a>
+      </div>
+      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">🌙</button>
+    </nav>
+  </div>
+
+  <div class="page-hero">
+    <div class="page-hero-badge"><span class="page-hero-dot"></span>Live Simulation</div>
+    <h2 class="page-hero-title">Cyber-Physical <em>Stage</em> Demo</h2>
+    <p class="page-hero-sub">Real-time IoT Smart Factory Monitor with predictive maintenance — Industry 4.0 in action.
+    </p>
+
+  </div>
+
+  <div class="all-wrap" style="margin-top: 2rem;">
+    <div class="controls-bar">
+      <span class="ctrl-label">SIMULATION CONTROL</span>
+      <!-- Hidden status elements required by simulation JS -->
+      <div class="sim-time" id="simTime" style="display:none;">SIM TIME: 00:00:00</div>
+      <div class="status-pill ok" id="globalStatus" style="display:none;">● SYSTEM OK</div>
+      <div class="ctrl-group">
+        <button class="btn btn-primary" id="btnStart" onclick="startSim()">▶ START</button>
+        <button class="btn btn-outline" id="btnPause" onclick="pauseSim()" disabled>⏸ PAUSE</button>
+        <button class="btn btn-outline" id="btnReset" onclick="resetSim()">↺ RESET</button>
+      </div>
+      <div class="ctrl-group">
+        <label>SPEED</label>
+        <input type="range" id="speedSlider" min="0.5" max="4" step="0.5" value="1" oninput="updateSpeed(this.value)">
+        <span class="ctrl-label" id="speedLabel">1×</span>
+      </div>
+      <div class="ctrl-group">
+        <label>FAULT RATE</label>
+        <input type="range" id="faultSlider" min="0" max="50" step="5" value="15"
+          oninput="document.getElementById('faultLabel').textContent=this.value+'%'">
+        <span class="ctrl-label" id="faultLabel">15%</span>
+      </div>
+      <div class="ctrl-group">
+        <label>MACHINES</label>
+        <select id="machineCount" onchange="initMachines()">
+          <option value="3">3</option>
+          <option value="4" selected>4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+        </select>
+      </div>
+      <button class="btn btn-danger" onclick="injectFault()" id="btnFault">⚡ INJECT FAULT</button>
+      <button class="btn btn-success" onclick="clearFaults()" id="btnClear" disabled>✓ CLEAR FAULTS</button>
+      <div class="header-spacer"></div>
+      <div class="ctrl-label" id="iterLabel">ITERATIONS: 0</div>
+    </div>
+
+    <!-- METRIC CARDS -->
+    <div class="main-grid">
+      <div class="metric-card" id="card-temp">
+        <div class="metric-label">TEMPERATURE</div>
+        <div class="metric-value" id="val-temp">--</div>
+        <div class="metric-unit">°C · Avg across machines</div>
+        <div class="metric-bar">
+          <div class="metric-bar-fill" id="bar-temp" style="width:0%"></div>
+        </div>
+        <div class="metric-trend" id="trend-temp"></div>
+      </div>
+      <div class="metric-card" id="card-vib">
+        <div class="metric-label">VIBRATION</div>
+        <div class="metric-value" id="val-vib">--</div>
+        <div class="metric-unit">mm/s · Avg across machines</div>
+        <div class="metric-bar">
+          <div class="metric-bar-fill" id="bar-vib" style="width:0%"></div>
+        </div>
+        <div class="metric-trend" id="trend-vib"></div>
+      </div>
+      <div class="metric-card" id="card-pressure">
+        <div class="metric-label">PRESSURE</div>
+        <div class="metric-value" id="val-pressure">--</div>
+        <div class="metric-unit">bar · System pressure</div>
+        <div class="metric-bar">
+          <div class="metric-bar-fill" id="bar-pressure" style="width:0%"></div>
+        </div>
+        <div class="metric-trend" id="trend-pressure"></div>
+      </div>
+      <div class="metric-card" id="card-rpm">
+        <div class="metric-label">SPINDLE RPM</div>
+        <div class="metric-value" id="val-rpm">--</div>
+        <div class="metric-unit">rev/min · Peak speed</div>
+        <div class="metric-bar">
+          <div class="metric-bar-fill" id="bar-rpm" style="width:0%"></div>
+        </div>
+        <div class="metric-trend" id="trend-rpm"></div>
+      </div>
+    </div>
+
+    <!-- KPI ROW -->
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-icon">🏭</div>
+        <div>
+          <div class="kpi-label">OEE SCORE</div>
+          <div class="kpi-value" id="kpi-oee">89.2%</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">⚡</div>
+        <div>
+          <div class="kpi-label">ENERGY kWh/shift</div>
+          <div class="kpi-value" id="kpi-energy">2450</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">📦</div>
+        <div>
+          <div class="kpi-label">THROUGHPUT units/shift</div>
+          <div class="kpi-value" id="kpi-throughput">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM SECTION -->
+    <div class="main-bottom">
+
+      <!-- COLUMN 1 (1.4fr): CHARTS, OEE, PRED MAINT -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div class="chart-card">
+          <div class="chart-title">
+            SENSOR TRENDS — REAL-TIME
+            <span class="live-dot"></span>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="mainChart" height="100"></canvas>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div class="chart-card">
+            <div class="chart-title">MACHINE HEALTH <span class="live-dot"></span></div>
+            <canvas id="healthChart" height="120"></canvas>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">FAULT DISTRIBUTION <span class="live-dot"></span></div>
+            <canvas id="faultChart" height="120"></canvas>
+          </div>
+        </div>
+        <!-- OEE PANEL -->
+        <div class="oee-panel">
+          <div class="chart-title">OEE COMPONENTS</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px;">
+            <div class="oee-stat">
+              <div class="oee-stat-val" id="oee-avail">--</div>
+              <div class="oee-stat-lbl">AVAIL.</div>
+            </div>
+            <div class="oee-stat">
+              <div class="oee-stat-val" id="oee-perf">--</div>
+              <div class="oee-stat-lbl">PERF.</div>
+            </div>
+            <div class="oee-stat">
+              <div class="oee-stat-val" id="oee-qual">--</div>
+              <div class="oee-stat-lbl">QUALITY</div>
+            </div>
+          </div>
+          <div style="margin-top:14px;">
+            <canvas id="oeeChart" height="80"></canvas>
+          </div>
+        </div>
+        <!-- PREDICTIVE MAINTENANCE -->
+        <div class="chart-card" style="overflow:auto;">
+          <div class="chart-title">PREDICTIVE MAINTENANCE</div>
+          <table class="pred-table">
+            <thead>
+              <tr>
+                <th>MACHINE</th>
+                <th>HEALTH</th>
+                <th>PRED TTF</th>
+                <th>RISK</th>
+                <th>ACTION</th>
+              </tr>
+            </thead>
+            <tbody id="predTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- COLUMN 2 (1.2fr): FACTORY FLOOR, ALERT LOG, MODEL PERF, ENERGY -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div class="machine-viz">
+          <div class="chart-title">FACTORY FLOOR — LIVE VIEW <span class="live-dot"></span></div>
+          <div class="factory-floor" id="factoryFloor"></div>
+        </div>
+        <!-- ALERT LOG -->
+        <div class="alert-log" style="flex: 1; min-height: 250px;">
+          <div class="alert-log-title">SYSTEM ALERT LOG</div>
+          <div class="alert-list" id="alertList"></div>
+        </div>
+        <!-- ACCURACY PANEL -->
+        <div class="chart-card">
+          <div class="chart-title">MODEL PERFORMANCE</div>
+          <div
+            style="font-family:'Share Tech Mono',monospace;font-size:11px;display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+            <div style="display:flex;justify-content:space-between;"><span style="color:var(--text2)">Pred. Maint.
+                Accuracy</span><span style="color:var(--accent2)">88.5%</span></div>
+            <div style="display:flex;justify-content:space-between;"><span style="color:var(--text2)">Simulation
+                Accuracy</span><span style="color:var(--accent2)">97.2%</span></div>
+            <div style="display:flex;justify-content:space-between;"><span style="color:var(--text2)">Sync
+                Latency</span><span style="color:var(--accent)">&lt;1s</span></div>
+            <div style="display:flex;justify-content:space-between;"><span style="color:var(--text2)">System
+                Uptime</span><span style="color:var(--accent2)">99.9%</span></div>
+            <div style="display:flex;justify-content:space-between;"><span style="color:var(--text2)">ROI
+                (3yr)</span><span style="color:#af52de">435%</span></div>
+            <div style="display:flex;justify-content:space-between;"><span style="color:var(--text2)">Payback
+                Period</span><span style="color:var(--warn2)">7 months</span></div>
+          </div>
+        </div>
+        <!-- ENERGY PANEL -->
+        <div class="chart-card">
+          <div class="chart-title">ENERGY CONSUMPTION BY SYSTEM</div>
+          <div style="padding:4px 0;">
+            <div class="energy-row">
+              <div class="energy-label">CNC Mill</div>
+              <div class="energy-bar-bg">
+                <div class="energy-bar-fill" id="enBar-cnc" style="width:0%;background:var(--accent)"></div>
+              </div>
+              <div class="energy-val" id="enVal-cnc">0</div>
+            </div>
+            <div class="energy-row">
+              <div class="energy-label">Lathe</div>
+              <div class="energy-bar-bg">
+                <div class="energy-bar-fill" id="enBar-lathe" style="width:0%;background:#af52de"></div>
+              </div>
+              <div class="energy-val" id="enVal-lathe">0</div>
+            </div>
+            <div class="energy-row">
+              <div class="energy-label">Robot Arm</div>
+              <div class="energy-bar-bg">
+                <div class="energy-bar-fill" id="enBar-robot" style="width:0%;background:var(--accent2)"></div>
+              </div>
+              <div class="energy-val" id="enVal-robot">0</div>
+            </div>
+            <div class="energy-row">
+              <div class="energy-label">Conveyor</div>
+              <div class="energy-bar-bg">
+                <div class="energy-bar-fill" id="enBar-conv" style="width:0%;background:var(--warn2)"></div>
+              </div>
+              <div class="energy-val" id="enVal-conv">0</div>
+            </div>
+            <div class="energy-row">
+              <div class="energy-label">HVAC</div>
+              <div class="energy-bar-bg">
+                <div class="energy-bar-fill" id="enBar-hvac" style="width:0%;background:#ff2d55"></div>
+              </div>
+              <div class="energy-val" id="enVal-hvac">0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- NOTIFICATION BANNERS -->
+    <div class="notif-banner" id="notifBanner"></div>
+
+  </div><!-- end all-wrap -->
+
+  <div class="foot glass-panel">
+    SIMULATING THE FUTURE OF SMART MANUFACTURING &nbsp;·&nbsp; B. RAJASEKHAR &nbsp;·&nbsp; M.TECH CSE &nbsp;·&nbsp;
+    VIJAYAWADA 2026
+  </div>
+
+  <script>
+    // ─── THEME TOGGLING ─────────────────────────────────────────
+    function toggleTheme() {
+      const body = document.body;
+      const btn = document.querySelector('.theme-toggle');
+      if (body.classList.contains('dark-mode')) {
+        body.classList.remove('dark-mode');
+        if (btn) btn.textContent = '🌙';
+      } else {
+        body.classList.add('dark-mode');
+        if (btn) btn.textContent = '☀️';
+      }
+    }
+    if (localStorage.getItem('theme') === 'dark') {
+      document.body.classList.add('dark-mode');
+      const btn = document.querySelector('.theme-toggle');
+      if (btn) btn.textContent = '☀️';
+    }
+
+    // ─── AUDIO ENGINE ───────────────────────────────────────────
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+    function getAudioCtx() {
+      if (!audioCtx) audioCtx = new AudioContext();
+      return audioCtx;
+    }
+
+    function playErrorSound() {
+      try {
+        const ctx = getAudioCtx();
+        // Alarm: two-tone beep
+        [0, 0.15, 0.3].forEach(offset => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain); gain.connect(ctx.destination);
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(880, ctx.currentTime + offset);
+          osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + offset + 0.12);
+          gain.gain.setValueAtTime(0.3, ctx.currentTime + offset);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + offset + 0.12);
+          osc.start(ctx.currentTime + offset);
+          osc.stop(ctx.currentTime + offset + 0.13);
+        });
+      } catch (e) { }
+    }
+
+    function playClearSound() {
+      try {
+        const ctx = getAudioCtx();
+        // Pleasant chime: ascending tones
+        [261.6, 329.6, 392.0, 523.3].forEach((freq, i) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain); gain.connect(ctx.destination);
+          osc.type = 'sine';
+          osc.frequency.value = freq;
+          gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.12);
+          gain.gain.linearRampToValueAtTime(0.2, ctx.currentTime + i * 0.12 + 0.04);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.12 + 0.3);
+          osc.start(ctx.currentTime + i * 0.12);
+          osc.stop(ctx.currentTime + i * 0.12 + 0.31);
+        });
+      } catch (e) { }
+    }
+
+    function playWarningSound() {
+      try {
+        const ctx = getAudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(600, ctx.currentTime);
+        osc.frequency.setValueAtTime(450, ctx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.26);
+      } catch (e) { }
+    }
+
+    // ─── STATE ──────────────────────────────────────────────────
+    let running = false;
+    let simInterval = null;
+    let simSeconds = 0;
+    let iterations = 0;
+    let speedMult = 1;
+    let machines = [];
+    let faultActive = false;
+    let prevValues = { temp: 0, vib: 0, pressure: 0, rpm: 0 };
+    let throughputCount = 0;
+    let oeeHistory = [];
+    let lastFaultState = false;
+
+    const MACHINE_NAMES = ['CNC Mill', 'Lathe', 'Robot Arm', 'Conveyor', 'Drill Press', 'Welder'];
+    const MACHINE_ICONS = ['⚙️', '🔧', '🦾', '🔄', '🪛', '⚡'];
+
+    // ─── CHART SETUP ────────────────────────────────────────────
+    // Using standard CSS variable colors for charts if possible, but hardcoded works fine for ChartJS
+    const chartColors = {
+      temp: '#ff3b30',
+      vib: '#007aff',
+      pressure: '#34c759',
+      rpm: '#ff9500'
+    };
+
+    const mainChart = new Chart(document.getElementById('mainChart'), {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [
+          { label: 'Temp °C', data: [], borderColor: chartColors.temp, backgroundColor: 'rgba(255,59,48,0.1)', fill: true, tension: 0.4, pointRadius: 0 },
+          { label: 'Vibration mm/s×10', data: [], borderColor: chartColors.vib, backgroundColor: 'rgba(0,122,255,0.1)', fill: true, tension: 0.4, pointRadius: 0 },
+          { label: 'Pressure bar×10', data: [], borderColor: chartColors.pressure, backgroundColor: 'rgba(52,199,89,0.1)', fill: true, tension: 0.4, pointRadius: 0 },
+          { label: 'RPM/20', data: [], borderColor: chartColors.rpm, backgroundColor: 'rgba(255,149,0,0.1)', fill: true, tension: 0.4, pointRadius: 0 },
+        ]
+      },
+      options: {
+        responsive: true, animation: { duration: 200 },
+        plugins: { legend: { labels: { color: 'var(--text)', font: { family: 'Share Tech Mono', size: 10 } } } },
+        scales: {
+          x: { ticks: { color: 'var(--text2)', font: { family: 'Share Tech Mono', size: 9 }, maxTicksLimit: 10 }, grid: { color: 'rgba(128,128,128,0.2)' } },
+          y: { ticks: { color: 'var(--text2)', font: { family: 'Share Tech Mono', size: 9 } }, grid: { color: 'rgba(128,128,128,0.2)' } }
+        }
+      }
+    });
+
+    const healthChart = new Chart(document.getElementById('healthChart'), {
+      type: 'radar',
+      data: {
+        labels: ['Temp', 'Vibration', 'Pressure', 'RPM', 'Efficiency', 'Quality'],
+        datasets: [{ label: 'System Health', data: [90, 85, 88, 92, 87, 94], borderColor: '#007aff', backgroundColor: 'rgba(0,122,255,0.2)', pointBackgroundColor: '#007aff' }]
+      },
+      options: {
+        responsive: true, animation: { duration: 300 },
+        plugins: { legend: { display: false } },
+        scales: {
+          r: {
+            ticks: { color: 'var(--text2)', backdropColor: 'transparent', font: { size: 8 } },
+            grid: { color: 'rgba(128,128,128,0.2)' },
+            pointLabels: { color: 'var(--text2)', font: { family: 'Share Tech Mono', size: 9 } },
+            min: 0, max: 100
+          }
+        }
+      }
+    });
+
+    const faultChart = new Chart(document.getElementById('faultChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Healthy', 'Warning', 'Fault'],
+        datasets: [{ data: [4, 0, 0], backgroundColor: ['#34c759', '#ff9500', '#ff3b30'], borderColor: 'var(--panel)', borderWidth: 2 }]
+      },
+      options: {
+        responsive: true, animation: { duration: 300 },
+        plugins: {
+          legend: { labels: { color: 'var(--text2)', font: { family: 'Share Tech Mono', size: 9 }, boxWidth: 10 } }
+        }
+      }
+    });
+
+    const oeeChart = new Chart(document.getElementById('oeeChart'), {
+      type: 'bar',
+      data: {
+        labels: [],
+        datasets: [{ label: 'OEE %', data: [], backgroundColor: 'rgba(0,122,255,0.3)', borderColor: '#007aff', borderWidth: 1 }]
+      },
+      options: {
+        responsive: true, animation: { duration: 200 },
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { display: false },
+          y: { min: 60, max: 100, ticks: { color: 'var(--text2)', font: { size: 9 } }, grid: { color: 'rgba(128,128,128,0.2)' } }
+        }
+      }
+    });
+
+    // ─── MACHINES ────────────────────────────────────────────────
+    function initMachines() {
+      const count = parseInt(document.getElementById('machineCount').value);
+      machines = [];
+      for (let i = 0; i < count; i++) {
+        machines.push({
+          id: i,
+          name: MACHINE_NAMES[i % MACHINE_NAMES.length],
+          icon: MACHINE_ICONS[i % MACHINE_ICONS.length],
+          health: 85 + Math.random() * 15,
+          state: 'active', // active | idle | fault
+          temp: 60 + Math.random() * 15,
+          vib: 1 + Math.random() * 2,
+          ttf: Math.floor(200 + Math.random() * 300), // hours to failure
+        });
+      }
+      renderFloor();
+      renderPredTable();
+    }
+
+    function renderFloor() {
+      const floor = document.getElementById('factoryFloor');
+      floor.innerHTML = '';
+      machines.forEach(m => {
+        const block = document.createElement('div');
+        block.className = 'machine-block';
+        block.id = `mblock-${m.id}`;
+
+        const stateClass = m.state === 'fault' ? 'fault' : m.state === 'idle' ? 'idle' : 'active';
+        const indClass = m.state === 'fault' ? 'ind-red' : m.state === 'idle' ? 'ind-yellow' : 'ind-green';
+        const gearClass = m.state === 'fault' ? 'stopped' : m.state === 'idle' ? 'slow' : 'spinning';
+        const healthColor = m.health > 70 ? 'var(--accent2)' : m.health > 40 ? 'var(--warn2)' : 'var(--warn)';
+
+        block.innerHTML = `
+      <div class="machine-body ${stateClass}" id="mbody-${m.id}">
+        <div class="machine-indicator ${indClass}" id="mind-${m.id}"></div>
+        <svg class="gear-svg ${gearClass}" id="mgear-${m.id}" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="25" cy="25" r="8" fill="rgba(0,122,255,0.2)" stroke="var(--accent)" stroke-width="2"/>
+          <path d="M25 5v6M25 39v6M5 25h6M39 25h6M10.1 10.1l4.2 4.2M35.7 35.7l4.2 4.2M10.1 39.9l4.2-4.2M35.7 14.3l4.2-4.2" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="25" cy="25" r="3" fill="var(--accent)"/>
+        </svg>
+      </div>
+      <div class="machine-health-bar">
+        <div class="machine-health-fill" id="mhbar-${m.id}" style="width:${m.health}%;background:${healthColor}"></div>
+      </div>
+      <div class="machine-label" id="mlabel-${m.id}">${m.icon} ${m.name}<br><span style="color:${healthColor}">${m.health.toFixed(0)}%</span></div>
+    `;
+        floor.appendChild(block);
+      });
+    }
+
+    function updateFloor() {
+      machines.forEach(m => {
+        const body = document.getElementById(`mbody-${m.id}`);
+        const gear = document.getElementById(`mgear-${m.id}`);
+        const ind = document.getElementById(`mind-${m.id}`);
+        const hbar = document.getElementById(`mhbar-${m.id}`);
+        const label = document.getElementById(`mlabel-${m.id}`);
+        if (!body) return;
+
+        body.className = `machine-body ${m.state === 'fault' ? 'fault' : m.state === 'idle' ? 'idle' : 'active'}`;
+        ind.className = `machine-indicator ${m.state === 'fault' ? 'ind-red' : m.state === 'idle' ? 'ind-yellow' : 'ind-green'}`;
+        gear.className = `gear-svg ${m.state === 'fault' ? 'stopped' : m.state === 'idle' ? 'slow' : 'spinning'}`;
+        const hColor = m.health > 70 ? 'var(--accent2)' : m.health > 40 ? 'var(--warn2)' : 'var(--warn)';
+        hbar.style.width = m.health + '%';
+        hbar.style.background = hColor;
+        label.innerHTML = `${m.icon} ${m.name}<br><span style="color:${hColor}">${m.health.toFixed(0)}%</span>`;
+      });
+    }
+
+    function renderPredTable() {
+      const tbody = document.getElementById('predTableBody');
+      tbody.innerHTML = '';
+      machines.forEach(m => {
+        const risk = m.health > 70 ? 'LOW' : m.health > 40 ? 'MEDIUM' : 'HIGH';
+        const riskClass = m.health > 70 ? 'risk-low' : m.health > 40 ? 'risk-med' : 'risk-high';
+        const action = m.state === 'fault' ? '🔴 REPAIR NOW' : m.health < 50 ? '🟠 SCHEDULE MAINT.' : '🟢 MONITOR';
+        const row = document.createElement('tr');
+        row.id = `prow-${m.id}`;
+        row.innerHTML = `<td>${m.name}</td><td style="color:${m.health > 70 ? 'var(--accent2)' : m.health > 40 ? 'var(--warn2)' : 'var(--warn)'}">${m.health.toFixed(1)}%</td><td>${m.ttf}h</td><td class="${riskClass}">${risk}</td><td>${action}</td>`;
+        tbody.appendChild(row);
+      });
+    }
+
+    // ─── SIMULATION LOOP ─────────────────────────────────────────
+    const MAX_POINTS = 30;
+
+    function simulationStep() {
+      iterations++;
+      simSeconds++;
+      document.getElementById('iterLabel').textContent = `ITERATIONS: ${iterations}`;
+
+      const faultRate = parseInt(document.getElementById('faultSlider').value) / 100;
+
+      // Generate sensor values
+      const baseFault = faultActive || Math.random() < faultRate;
+      const temp = baseFault ? 75 + Math.random() * 20 : 55 + Math.random() * 18;
+      const vib = baseFault ? 4 + Math.random() * 3 : 1 + Math.random() * 2.5;
+      const pressure = baseFault ? 4.5 + Math.random() * 1.5 : 1.5 + Math.random() * 2;
+      const rpm = baseFault ? 1850 + Math.random() * 300 : 800 + Math.random() * 800;
+
+      // Update machine states
+      machines.forEach((m, i) => {
+        const mFault = baseFault && (i === 0 || Math.random() < 0.3);
+        if (mFault) {
+          m.state = 'fault';
+          m.health = Math.max(5, m.health - 2 - Math.random() * 3);
+          m.ttf = Math.max(1, m.ttf - 5);
+        } else if (Math.random() < 0.05) {
+          m.state = 'idle';
+          m.health = Math.min(100, m.health + 0.5);
+        } else {
+          m.state = 'active';
+          m.health = Math.min(100, m.health + Math.random() * 0.2 - 0.05);
+        }
+      });
+
+      updateFloor();
+      renderPredTable();
+
+      // Check for state transition (fault → ok or ok → fault)
+      const anyFault = machines.some(m => m.state === 'fault');
+      if (anyFault && !lastFaultState) {
+        playErrorSound();
+        showNotif('FAULT DETECTED — Predictive model triggered alert', 'error');
+        addAlert('error', 'FAULT DETECTED: Threshold exceeded — model activated');
+        document.getElementById('btnClear').disabled = false;
+      } else if (!anyFault && lastFaultState) {
+        playClearSound();
+        showNotif('ALL CLEAR — Systems operating within parameters', 'clear');
+        addAlert('ok', 'SYSTEM CLEARED: All parameters within safe range');
+      }
+      lastFaultState = anyFault;
+
+      // Update global status
+      const globalEl = document.getElementById('globalStatus');
+      if (anyFault) {
+        globalEl.textContent = '● FAULT ACTIVE';
+        globalEl.className = 'status-pill err';
+      } else {
+        globalEl.textContent = '● SYSTEM OK';
+        globalEl.className = 'status-pill ok';
+      }
+
+      // Update metric cards
+      updateMetric('temp', temp, prevValues.temp, 0, 100, '°C', 70, 80);
+      updateMetric('vib', vib.toFixed(2), prevValues.vib, 0, 7, 'mm/s', 4, 5.5);
+      updateMetric('pressure', pressure.toFixed(2), prevValues.pressure, 0, 6, 'bar', 4, 5);
+      updateMetric('rpm', Math.floor(rpm), prevValues.rpm, 0, 2200, 'RPM', 1800, 2000);
+
+      prevValues = { temp, vib, pressure, rpm };
+
+      // Update main chart
+      const label = `T${iterations}`;
+      mainChart.data.labels.push(label);
+      mainChart.data.datasets[0].data.push(temp.toFixed(1));
+      mainChart.data.datasets[1].data.push((vib * 10).toFixed(1));
+      mainChart.data.datasets[2].data.push((pressure * 10).toFixed(1));
+      mainChart.data.datasets[3].data.push((rpm / 20).toFixed(0));
+      if (mainChart.data.labels.length > MAX_POINTS) {
+        mainChart.data.labels.shift();
+        mainChart.data.datasets.forEach(d => d.data.shift());
+      }
+      mainChart.update();
+
+      // Health radar
+      const avgHealth = machines.reduce((a, m) => a + m.health, 0) / machines.length;
+      healthChart.data.datasets[0].data = [
+        100 - (temp - 55) * 1.5,
+        100 - vib * 10,
+        100 - (pressure - 1) * 10,
+        100 - (rpm - 800) * 0.03,
+        avgHealth * 0.9,
+        anyFault ? 55 : 88 + Math.random() * 10
+      ].map(v => Math.max(0, Math.min(100, v)));
+      healthChart.update();
+
+      // Fault doughnut
+      const faultCount = machines.filter(m => m.state === 'fault').length;
+      const idleCount = machines.filter(m => m.state === 'idle').length;
+      const okCount = machines.length - faultCount - idleCount;
+      faultChart.data.datasets[0].data = [okCount, idleCount, faultCount];
+      faultChart.update();
+
+      // OEE calculation
+      const availability = Math.min(100, avgHealth * 0.95 + (anyFault ? -10 : 2));
+      const performance = Math.min(100, 100 - faultCount * 8 + Math.random() * 4 - 2);
+      const quality = Math.min(100, 95 - faultCount * 3 + Math.random() * 3);
+      const oee = (availability / 100) * (performance / 100) * (quality / 100) * 100;
+
+      document.getElementById('oee-avail').textContent = availability.toFixed(1) + '%';
+      document.getElementById('oee-perf').textContent = performance.toFixed(1) + '%';
+      document.getElementById('oee-qual').textContent = quality.toFixed(1) + '%';
+      document.getElementById('kpi-oee').textContent = oee.toFixed(1) + '%';
+
+      oeeHistory.push(oee.toFixed(1));
+      if (oeeHistory.length > 15) oeeHistory.shift();
+      oeeChart.data.labels = oeeHistory.map((_, i) => i);
+      oeeChart.data.datasets[0].data = oeeHistory;
+      oeeChart.update();
+
+      // KPI updates
+      throughputCount += anyFault ? Math.floor(Math.random() * 2) : Math.floor(3 + Math.random() * 4);
+      document.getElementById('kpi-throughput').textContent = throughputCount;
+
+      const energyBase = 2450 + (anyFault ? 200 : -100) + Math.random() * 150;
+      document.getElementById('kpi-energy').textContent = Math.floor(energyBase);
+
+      // Energy bars
+      const systems = [
+        { id: 'cnc', base: 480, color: 'var(--accent)' },
+        { id: 'lathe', base: 320, color: '#af52de' },
+        { id: 'robot', base: 280, color: 'var(--accent2)' },
+        { id: 'conv', base: 180, color: 'var(--warn2)' },
+        { id: 'hvac', base: 220, color: '#ff2d55' }
+      ];
+      const maxEn = 600;
+      systems.forEach(s => {
+        const val = Math.floor(s.base + (anyFault ? 80 : 0) + Math.random() * 60);
+        document.getElementById(`enBar-${s.id}`).style.width = (val / maxEn * 100) + '%';
+        document.getElementById(`enVal-${s.id}`).textContent = val;
+      });
+
+      // Sim time
+      const h = String(Math.floor(simSeconds / 3600)).padStart(2, '0');
+      const m2 = String(Math.floor((simSeconds % 3600) / 60)).padStart(2, '0');
+      const s2 = String(simSeconds % 60).padStart(2, '0');
+      document.getElementById('simTime').textContent = `SIM TIME: ${h}:${m2}:${s2}`;
+
+      // Random warning alerts
+      if (Math.random() < 0.08) {
+        const msgs = [
+          'Temperature spike detected on Machine #' + (Math.floor(Math.random() * machines.length) + 1),
+          'Vibration threshold warning: mm/s > ' + (3.5 + Math.random()).toFixed(1),
+          'Predictive model flagged bearing wear risk',
+          'Energy consumption spike — HVAC load increased',
+          'Production rate deviation: -' + (5 + Math.floor(Math.random() * 10)) + '%'
+        ];
+        const type = anyFault ? 'warn' : 'info';
+        addAlert(type, msgs[Math.floor(Math.random() * msgs.length)]);
+        if (anyFault) playWarningSound();
+      }
+
+      // Broadcast ROI state to results page
+      const savings = (60 * (oee / 89.2));
+      const payback = (35 / savings * 12).toFixed(1);
+      const roiTotal = (((savings * 3) - 35) / 35 * 100).toFixed(0);
+
+      const roiData = {
+        uptime: availability.toFixed(1) + '%',
+        savings: '₹' + savings.toFixed(1) + 'L',
+        payback: payback + ' mo',
+        roi: roiTotal + '%'
+      };
+      localStorage.setItem('sim_roi_sync', JSON.stringify(roiData));
+    }
+
+    function updateMetric(id, val, prev, min, max, unit, warnLow, warnHigh) {
+      const numVal = parseFloat(val);
+      const isBad = numVal >= warnLow;
+      const pct = ((numVal - min) / (max - min) * 100);
+
+      const card = document.getElementById(`card-${id}`);
+      const valEl = document.getElementById(`val-${id}`);
+      const barEl = document.getElementById(`bar-${id}`);
+      const trendEl = document.getElementById(`trend-${id}`);
+
+      valEl.textContent = typeof val === 'number' ? val.toFixed(id === 'rpm' ? 0 : 1) : val;
+      valEl.className = 'metric-value' + (isBad ? ' warn' : '');
+      card.className = 'metric-card' + (isBad ? ' warn' : '');
+      barEl.style.width = Math.min(100, pct) + '%';
+      barEl.className = 'metric-bar-fill' + (isBad ? ' warn' : '');
+
+      const diff = numVal - parseFloat(prev || 0);
+      if (diff > 0) trendEl.innerHTML = `<span class="trend-down">▲ +${Math.abs(diff).toFixed(1)} ${unit}</span>`;
+      else if (diff < 0) trendEl.innerHTML = `<span class="trend-up">▼ ${Math.abs(diff).toFixed(1)} ${unit}</span>`;
+      else trendEl.innerHTML = `<span style="color:var(--text2)">● stable</span>`;
+    }
+
+    // ─── ALERTS & NOTIFICATIONS ──────────────────────────────────
+    let alertCount = 0;
+    function addAlert(type, msg) {
+      const list = document.getElementById('alertList');
+      const now = new Date();
+      const t = now.toTimeString().split(' ')[0];
+      const item = document.createElement('div');
+      item.className = `alert-item ${type}`;
+      item.innerHTML = `<span class="alert-time">[${t}]</span>${msg}`;
+      list.insertBefore(item, list.firstChild);
+      alertCount++;
+      if (list.children.length > 50) list.removeChild(list.lastChild);
+    }
+
+    let notifTimers = [];
+    function showNotif(msg, type) {
+      const banner = document.getElementById('notifBanner');
+      const notif = document.createElement('div');
+      notif.className = `notif ${type}`;
+      notif.innerHTML = `<span class="notif-icon">${type === 'error' ? '🚨' : '✅'}</span>${msg}`;
+      banner.appendChild(notif);
+      setTimeout(() => { if (notif.parentNode) banner.removeChild(notif); }, 4200);
+    }
+
+    // ─── CONTROLS ────────────────────────────────────────────────
+    function startSim() {
+      if (running) return;
+      running = true;
+      document.getElementById('btnStart').disabled = true;
+      document.getElementById('btnPause').disabled = false;
+      addAlert('info', 'Simulation started — Smart Factory Monitor synchronized');
+      const interval = Math.max(300, 2000 / speedMult);
+      simInterval = setInterval(simulationStep, interval);
+    }
+
+    function pauseSim() {
+      if (!running) return;
+      running = false;
+      clearInterval(simInterval);
+      document.getElementById('btnStart').disabled = false;
+      document.getElementById('btnPause').disabled = true;
+      addAlert('info', 'Simulation paused');
+    }
+
+    function resetSim() {
+      pauseSim();
+      simSeconds = 0;
+      iterations = 0;
+      throughputCount = 0;
+      oeeHistory = [];
+      lastFaultState = false;
+      faultActive = false;
+      prevValues = { temp: 0, vib: 0, pressure: 0, rpm: 0 };
+      mainChart.data.labels = [];
+      mainChart.data.datasets.forEach(d => d.data = []);
+      mainChart.update();
+      oeeChart.data.labels = [];
+      oeeChart.data.datasets[0].data = [];
+      oeeChart.update();
+      ['temp', 'vib', 'pressure', 'rpm'].forEach(id => {
+        document.getElementById(`val-${id}`).textContent = '--';
+        document.getElementById(`bar-${id}`).style.width = '0%';
+        document.getElementById(`trend-${id}`).textContent = '';
+      });
+      document.getElementById('simTime').textContent = 'SIM TIME: 00:00:00';
+      document.getElementById('iterLabel').textContent = 'ITERATIONS: 0';
+      document.getElementById('kpi-throughput').textContent = '0';
+      document.getElementById('globalStatus').textContent = '● SYSTEM OK';
+      document.getElementById('globalStatus').className = 'status-pill ok';
+      document.getElementById('btnStart').disabled = false;
+      document.getElementById('btnPause').disabled = true;
+      document.getElementById('btnClear').disabled = true;
+      initMachines();
+      addAlert('info', 'Simulation reset — all parameters cleared');
+    }
+
+    function updateSpeed(val) {
+      speedMult = parseFloat(val);
+      document.getElementById('speedLabel').textContent = val + '×';
+      if (running) {
+        clearInterval(simInterval);
+        simInterval = setInterval(simulationStep, Math.max(300, 2000 / speedMult));
+      }
+    }
+
+    function injectFault() {
+      faultActive = true;
+      machines[0].state = 'fault';
+      machines[0].health = Math.max(10, machines[0].health - 30);
+      updateFloor();
+      playErrorSound();
+      showNotif('MANUAL FAULT INJECTED — Machine #1 critical', 'error');
+      addAlert('error', 'MANUAL FAULT INJECTION: Machine #1 critical failure simulated');
+      document.getElementById('btnClear').disabled = false;
+      document.getElementById('globalStatus').textContent = '● FAULT ACTIVE';
+      document.getElementById('globalStatus').className = 'status-pill err';
+    }
+
+    function clearFaults() {
+      faultActive = false;
+      machines.forEach(m => { m.state = 'active'; m.health = Math.min(100, m.health + 20); });
+      updateFloor();
+      playClearSound();
+      showNotif('FAULTS CLEARED — All systems nominal', 'clear');
+      addAlert('ok', 'FAULT CLEARED: Recovery complete — all machines operational');
+      document.getElementById('btnClear').disabled = true;
+      document.getElementById('globalStatus').textContent = '● SYSTEM OK';
+      document.getElementById('globalStatus').className = 'status-pill ok';
+      lastFaultState = false;
+    }
+
+    // ─── INIT ────────────────────────────────────────────────────
+    initMachines();
+    addAlert('info', 'Smart Factory Monitor System initialized — press START to begin simulation');
+    addAlert('info', 'Predictive maintenance LSTM model loaded — accuracy: 88.5%');
+    addAlert('info', 'Connected to 4 machines — OEE target: 89.2%');
+    // ─── THEME ───────────────────────────────────────────────────
+    function toggleTheme() {
+      document.body.classList.toggle('dark-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      document.querySelector('.theme-toggle').textContent = isDark ? '☀️' : '🌙';
+    }
+    // Apply saved theme on load
+    if (localStorage.getItem('theme') === 'dark') {
+      document.body.classList.add('dark-mode');
+      document.querySelector('.theme-toggle').textContent = '☀️';
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulating the Future of Smart Manufacturing</title>
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+  :root {
+    /* APPLE iOS 26 LIGHT THEME */
+    --bg-color: #f2f2f7;        
+    --text-main: #000000;       
+    --text-muted: #8e8e93;      
+    
+    --accent-green: #34c759;    
+    --accent-blue: #007aff;     
+    --accent-purple: #af52de;   
+    --accent-pink: #ff2d55;     
+    --accent-amber: #ff9500;
+
+    /* Dynamic Glass Variables */
+    --chart-grid: rgba(0, 0, 0, 0.05);
+    --chart-bg-start: rgba(0, 122, 255, 0.2);
+  }
+
+  body.dark-mode {
+    /* APPLE iOS 26 DARK THEME */
+    --bg-color: #000000;        
+    --text-main: #ffffff;       
+    --text-muted: #98989d;      
+    
+    --accent-green: #30d158;    
+    --accent-blue: #0a84ff;     
+    --accent-purple: #bf5af2;   
+    --accent-pink: #ff375f;     
+    --accent-amber: #ff9f0a;
+
+    --chart-grid: rgba(255, 255, 255, 0.08);
+    --chart-bg-start: rgba(10, 132, 255, 0.25);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    overflow-x: hidden;
+    transition: background-color 0.5s ease, color 0.5s ease;
+    position: relative;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── APPLE STYLE FLUID GRADIENT MESH BACKGROUND ── */
+  .mesh-container {
+    position: fixed;
+    top: -50%; left: -50%; width: 200%; height: 200%;
+    z-index: 0;
+    pointer-events: none;
+    background: 
+      radial-gradient(circle at 20% 30%, rgba(0, 122, 255, 0.25) 0%, transparent 40%),
+      radial-gradient(circle at 80% 20%, rgba(175, 82, 222, 0.2) 0%, transparent 40%),
+      radial-gradient(circle at 40% 80%, rgba(52, 199, 89, 0.2) 0%, transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(255, 45, 85, 0.15) 0%, transparent 40%);
+    filter: blur(100px);
+    animation: meshFlow 25s infinite alternate ease-in-out;
+  }
+  
+  body.dark-mode .mesh-container {
+    background: 
+      radial-gradient(circle at 20% 30%, rgba(10, 132, 255, 0.25) 0%, transparent 40%),
+      radial-gradient(circle at 80% 20%, rgba(191, 90, 242, 0.2) 0%, transparent 40%),
+      radial-gradient(circle at 40% 80%, rgba(48, 209, 88, 0.2) 0%, transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(255, 55, 95, 0.15) 0%, transparent 40%);
+    filter: blur(120px);
+  }
+
+  @keyframes meshFlow {
+    0% { transform: rotate(0deg) scale(1); }
+    100% { transform: rotate(10deg) scale(1.1); }
+  }
+
+  /* ── LIQUID GLASS PANEL ── */
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.10);
+    backdrop-filter: blur(60px) saturate(280%) brightness(106%);
+    -webkit-backdrop-filter: blur(60px) saturate(280%) brightness(106%);
+    border: 1px solid rgba(255, 255, 255, 0.80);
+    box-shadow:
+      0 20px 80px rgba(0, 0, 0, 0.06),
+      0 4px 16px rgba(0, 0, 0, 0.04),
+      inset 0 1.5px 0 rgba(255, 255, 255, 1),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.20),
+      inset 1.5px 0 0 rgba(255, 255, 255, 0.55),
+      inset -1.5px 0 0 rgba(255, 255, 255, 0.55);
+    transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  body.dark-mode .glass-panel {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow:
+      0 20px 80px rgba(0, 0, 0, 0.50),
+      0 4px 16px rgba(0, 0, 0, 0.30),
+      inset 0 1.5px 0 rgba(255, 255, 255, 0.16),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  .glass-hover:hover {
+    transform: translateY(-5px) scale(1.01);
+    background: rgba(255, 255, 255, 0.18);
+    box-shadow:
+      0 30px 100px rgba(0, 0, 0, 0.10),
+      inset 0 1.5px 0 rgba(255, 255, 255, 1),
+      inset 1.5px 0 0 rgba(255, 255, 255, 0.65),
+      inset -1.5px 0 0 rgba(255, 255, 255, 0.65);
+  }
+  body.dark-mode .glass-hover:hover {
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 30px 100px rgba(0,0,0,0.60), inset 0 1.5px 0 rgba(255,255,255,0.22);
+  }
+
+  /* ── NAVIGATION ── */
+  nav {
+    position: sticky; top: 12px; z-index: 100;
+    max-width: 1100px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 20px; border-radius: 50px; height: 64px;
+    background: rgba(255, 255, 255, 0.72);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    backdrop-filter: blur(40px) saturate(200%);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    box-shadow: 0 12px 48px rgba(20,20,50,0.09), 0 2px 8px rgba(20,20,50,0.06), inset 0 1px 1.5px rgba(255,255,255,0.9);
+    transition: all 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    overflow-x: auto; white-space: nowrap;
+  }
+  .nav-links { display: flex; align-items: center; gap: 4px; }
+  body.dark-mode nav { background: rgba(18,18,30,0.82); border-color: rgba(255,255,255,0.08); box-shadow: 0 12px 48px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.08); }
+  nav .nav-btn { text-decoration: none; background: transparent; border: none; color: var(--text-muted); font-family: 'Inter', sans-serif; font-size: 0.88rem; font-weight: 500; padding: 8px 16px; border-radius: 24px; cursor: pointer; transition: all 0.45s cubic-bezier(0.22, 1, 0.36, 1); }
+  nav .nav-btn:hover, nav .nav-btn.active { color: var(--text-main); background: rgba(255,255,255,0.5); }
+  body.dark-mode nav .nav-btn:hover, body.dark-mode nav .nav-btn.active { background: rgba(255,255,255,0.1); }
+  nav .ai-btn { color: var(--accent-purple) !important; background: rgba(175,82,222,0.1) !important; font-weight: 600; }
+  .theme-toggle { width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.55); background: rgba(255,255,255,0.5); cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: all 0.45s cubic-bezier(0.22, 1, 0.36, 1); color: var(--text-main); padding: 0; margin-left: 0; flex-shrink: 0; }
+  body.dark-mode .theme-toggle { border-color: rgba(255,255,255,0.08); background: rgba(18,18,30,0.7); }
+  .theme-toggle:hover { transform: rotate(20deg); }
+
+  /* ── PAGE HERO ── */
+  .page-hero { text-align: center; padding: 2.5rem 2rem 2rem; border-radius: 32px; margin: 1rem auto 0; max-width: 1100px; position: relative; overflow: hidden; z-index: 1; }
+  .page-hero::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(0,122,255,0.06) 0%, rgba(175,82,222,0.05) 50%, rgba(52,199,89,0.05) 100%); border-radius: inherit; pointer-events: none; }
+  .page-hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 18px; border-radius: 30px; background: rgba(0,122,255,0.1); border: 1px solid rgba(0,122,255,0.22); color: var(--accent-blue); font-size: 0.78rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 1.25rem; font-family: 'Outfit', sans-serif; }
+  body.dark-mode .page-hero-badge { background: rgba(10,132,255,0.15); border-color: rgba(10,132,255,0.3); }
+  .page-hero-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-green); animation: heroDotPulse 1.5s infinite; display: inline-block; }
+  @keyframes heroDotPulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.6); opacity: 0.5; } }
+  .page-hero-title { font-family: 'Outfit', sans-serif; font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 800; line-height: 1.1; letter-spacing: -1.5px; margin-bottom: 1rem; color: var(--text-main); }
+  .page-hero-title em { font-style: normal; background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .page-hero-sub { color: var(--text-muted); font-size: 1.05rem; max-width: 620px; margin: 0 auto 1.75rem; font-weight: 500; }
+  .page-hero-pills { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+  .hero-pill { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: 30px; background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.5); font-size: 0.85rem; font-weight: 600; color: var(--text-main); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); transition: all 0.3s ease; }
+  body.dark-mode .hero-pill { background: rgba(40,40,40,0.6); border-color: rgba(255,255,255,0.1); }
+  .hero-pill:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
+
+  /* ── SECTIONS ── */
+  .section {
+    display: none;
+    min-height: calc(100vh - 100px);
+    padding: 4rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+    animation: fadeUp 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  }
+
+  .section.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(40px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  h1, h2, h3, h4, h5 { font-family: 'Outfit', sans-serif; letter-spacing: -0.5px; }
+
+  /* Glass Section Titles */
+  .sec-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 0.5rem;
+    padding: 12px 28px;
+    border-radius: 30px;
+  }
+
+  .sec-sub {
+    color: var(--text-muted);
+    font-size: 1.15rem;
+    margin-bottom: 3rem;
+    margin-left: 15px;
+    font-weight: 500;
+  }
+
+  /* ── HERO / TITLE ── */
+  .hero { text-align: center; padding: 2rem 1rem 3rem; }
+  
+  .hero-glass { border-radius: 40px; padding: 5rem 2rem; margin-bottom: 2rem; }
+
+  .hero .tag {
+    display: inline-block;
+    background: rgba(175, 82, 222, 0.15);
+    color: var(--accent-purple);
+    padding: 8px 24px;
+    border-radius: 24px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 1.5rem;
+  }
+  body.dark-mode .hero .tag { background: rgba(191, 90, 242, 0.2); }
+
+  .hero h1 {
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+    color: var(--text-main);
+    letter-spacing: -1.5px;
+  }
+
+  .hero p {
+    max-width: 700px;
+    margin: 0 auto 3rem;
+    color: var(--text-muted);
+    font-size: 1.25rem;
+    font-weight: 500;
+  }
+
+  .badge-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+  .badge {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    color: var(--text-main);
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 12px 24px;
+    border-radius: 30px;
+    backdrop-filter: blur(30px) saturate(150%);
+    -webkit-backdrop-filter: blur(30px) saturate(150%);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+    transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  body.dark-mode .badge { 
+    background: rgba(40, 40, 40, 0.6); 
+    border-color: rgba(255, 255, 255, 0.1); 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  }
+  
+  .badge:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    background: rgba(255, 255, 255, 0.9);
+  }
+  body.dark-mode .badge:hover { background: rgba(60, 60, 60, 0.8); }
+
+  /* ── CARDS & GRIDS ── */
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
+  .card { border-radius: 32px; padding: 2.5rem; }
+
+  .card .icon { 
+    font-size: 2.8rem; margin-bottom: 1.5rem; display: inline-flex; align-items: center; justify-content: center;
+    width: 70px; height: 70px; background: rgba(255, 255, 255, 0.8); border-radius: 20px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.06), inset 0 1px 2px rgba(255,255,255,1);
+    transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  body.dark-mode .card .icon { background: rgba(0,0,0,0.4); box-shadow: 0 8px 25px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.1); }
+  .card:hover .icon { transform: scale(1.15) rotate(5deg); }
+
+  .card h3 { font-size: 1.4rem; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main); }
+  .card p { color: var(--text-muted); font-size: 1.05rem; }
+
+  /* Credentials Banner */
+  .credentials { margin-top: 3rem; padding: 3rem; border-radius: 36px; display: flex; justify-content: space-around; flex-wrap: wrap; gap: 2rem; }
+  .cred-block { text-align: center; }
+  .cred-name { font-family: 'Outfit', sans-serif; font-size: 1.8rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px; }
+  .cred-role { font-size: 0.9rem; color: var(--accent-purple); font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 6px; display: block;}
+
+  /* ── PROBLEMS & LISTS ── */
+  .problem-item { border-radius: 24px; padding: 2rem; display: flex; align-items: flex-start; gap: 1.5rem; margin-bottom: 1.5rem; }
+  .problem-item .pi { font-size: 2rem; background: rgba(255, 45, 85, 0.1); color: var(--accent-pink); padding: 16px; border-radius: 20px; }
+  body.dark-mode .problem-item .pi { background: rgba(255, 55, 95, 0.2); }
+  .problem-item h4 { font-size: 1.3rem; margin-bottom: 0.5rem; color: var(--text-main); font-weight: 700; }
+  .problem-item p { color: var(--text-muted); font-size: 1.05rem; }
+
+  /* ── METRICS ── */
+  .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 2rem; margin-top: 2rem; }
+  .metric-box { padding: 2.5rem 1.5rem; text-align: center; border-radius: 28px; }
+
+  .metric-box .val { font-family: 'Outfit', sans-serif; font-size: 3.5rem; font-weight: 800; color: var(--accent-blue); display: block; line-height: 1; margin-bottom: 0.5rem; letter-spacing: -1.5px; }
+  .metric-box .val.warn { color: var(--accent-pink); }
+  .metric-box .val.hot  { color: var(--accent-purple); }
+  .metric-box .val.safe { color: var(--accent-green); }
+  .metric-box .label { font-size: 0.9rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+
+  /* ── ARCHITECTURE & TECH ── */
+  .arch-layer { padding: 1.8rem 2.5rem; display: flex; align-items: center; gap: 1.5rem; margin-bottom: 16px; border-radius: 24px; position: relative; }
+  .arch-layer::after { content: '↓'; position: absolute; bottom: -28px; left: 50%; transform: translateX(-50%); color: var(--text-muted); font-size: 1.5rem; font-weight: 300; }
+  .arch-layer:last-child::after { display: none; }
+  .al-icon { font-size: 2.2rem; background: rgba(255,255,255,0.7); padding: 16px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); }
+  body.dark-mode .al-icon { background: rgba(0,0,0,0.4); }
+  .al-name { font-weight: 800; font-size: 1.3rem; width: 200px; flex-shrink: 0; color: var(--text-main); letter-spacing: -0.5px;}
+  .al-desc { color: var(--text-muted); font-size: 1.05rem; }
+
+  .tech-tag { background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(255, 255, 255, 0.4); padding: 10px 20px; border-radius: 20px; font-size: 0.95rem; font-weight: 600; display: inline-block; margin: 0 10px 10px 0; color: var(--text-main); box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+  body.dark-mode .tech-tag { background: rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.1); }
+
+  /* ── LIVE SIMULATION (NEW STAGE) ── */
+  .sim-panel { border-radius: 36px; padding: 3rem; }
+
+  .status-bar { padding: 1.5rem; border-radius: 20px; font-weight: 700; text-align: center; font-size: 1.25rem; letter-spacing: 1px; margin-bottom: 2rem; transition: all 0.3s; }
+  .status-ok   { background: rgba(52, 199, 89, 0.15); color: var(--accent-green); }
+  .status-warn { background: rgba(255, 45, 85, 0.15); color: var(--accent-pink); }
+
+  /* Cyber-Physical Stage Modern Animation Styles */
+  .stage-container {
+    display: flex; gap: 2rem; flex-wrap: wrap; margin-bottom: 2rem;
+  }
+  
+  .stage-main {
+    flex: 1; min-width: 300px;
+    height: 380px;
+    border-radius: 24px;
+    position: relative;
+    overflow: hidden;
+    padding: 0;
+    perspective: 1000px;
+  }
+  
+  .stage-side {
+    width: 300px;
+    display: flex; flex-direction: column; gap: 1rem;
+  }
+
+  /* ── Sleek Glowing Rail (Conveyor) ── */
+  .conveyor-belt {
+    position: absolute;
+    bottom: 50px; width: 100%; height: 6px;
+    background: rgba(255,255,255,0.2);
+    box-shadow: 0 0 15px var(--accent-blue);
+    border-radius: 3px;
+  }
+  body.dark-mode .conveyor-belt {
+    background: rgba(255,255,255,0.1);
+  }
+  /* Energy Pulse on the Rail */
+  .conveyor-belt::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%; width: 50%; height: 100%;
+    background: linear-gradient(90deg, transparent, var(--accent-blue), transparent);
+    animation: rail-pulse 2s linear infinite;
+  }
+  @keyframes rail-pulse { to { left: 200%; } }
+
+  /* ── Glowing Data Core (Workpiece) ── */
+  #workpiece {
+    position: absolute;
+    bottom: 56px; left: -100px;
+    width: 60px; height: 60px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid var(--accent-blue);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-main); font-size: 11px; font-weight: 800; font-family: 'Inter';
+    z-index: 10;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 20px var(--accent-blue), inset 0 0 15px var(--accent-blue);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1), background 0.3s, box-shadow 0.3s, border-color 0.3s, opacity 0.3s;
+  }
+  /* Spinning inner dash for high-tech look */
+  #workpiece::before {
+    content: ''; position: absolute; inset: -4px;
+    border: 2px dashed rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    animation: spin-slow 4s linear infinite;
+  }
+  @keyframes spin-slow { to { transform: rotate(360deg); } }
+
+  /* ── Target Lock Label ── */
+  #target-lock {
+    position: absolute;
+    bottom: 125px; left: -100px;
+    color: var(--accent-blue);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px; font-weight: bold;
+    z-index: 15;
+    pointer-events: none;
+    text-shadow: 0 0 5px var(--accent-blue);
+    white-space: nowrap;
+  }
+
+  /* ── Robotic Piston (Actuator) ── */
+  #actuator-arm {
+    position: absolute;
+    left: 50%; top: -200px;
+    width: 30px; height: 260px;
+    background: linear-gradient(180deg, var(--panel-bg), rgba(255,255,255,0.8));
+    backdrop-filter: blur(10px);
+    border: 2px solid var(--panel-border);
+    transform: translateX(-50%);
+    z-index: 20;
+    border-radius: 15px;
+    transition: top 0.25s cubic-bezier(0.68, -0.55, 0.265, 1.55), box-shadow 0.3s, border-color 0.3s;
+  }
+  body.dark-mode #actuator-arm { background: linear-gradient(180deg, var(--panel-bg), rgba(40,40,40,0.8)); }
+  
+  #actuator-arm::after {
+    content: 'SORTER';
+    position: absolute;
+    bottom: -15px; left: -20px;
+    width: 70px; height: 20px;
+    background: var(--text-main);
+    color: var(--bg-color);
+    border-radius: 6px;
+    font-size: 9px; text-align: center; font-weight: 800; line-height: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  }
+  .actuating { 
+    top: -20px !important;
+    border-color: var(--accent-pink) !important;
+    box-shadow: 0 0 40px var(--accent-pink) !important;
+  }
+
+  /* ── Laser Scanner ── */
+  .sensor-beam {
+    position: absolute; left: 50%; top: 0; width: 120px; height: 100%; 
+    transform: translateX(-50%);
+    background: linear-gradient(180deg, transparent, rgba(52, 199, 89, 0.15) 80%, transparent);
+    border-left: 1px solid var(--accent-green);
+    border-right: 1px solid var(--accent-green);
+    z-index: 1;
+    clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
+    animation: scan-pulse 2s infinite alternate;
+  }
+  @keyframes scan-pulse {
+    0% { opacity: 0.3; filter: drop-shadow(0 0 5px var(--accent-green)); }
+    100% { opacity: 1; filter: drop-shadow(0 0 15px var(--accent-green)); }
+  }
+
+  /* Sensor Readouts inside stage side */
+  .mini-sensor {
+    background: rgba(255,255,255,0.4);
+    border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 20px; padding: 1.2rem; text-align: center;
+    box-shadow: inset 0 2px 10px rgba(255,255,255,0.8);
+  }
+  body.dark-mode .mini-sensor { background: rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.1); box-shadow: inset 0 2px 10px rgba(255,255,255,0.05); }
+  
+  .mini-sensor .s-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px;}
+  .mini-sensor .s-val { font-family: 'Outfit', sans-serif; font-size: 1.8rem; font-weight: 800; }
+
+  /* PLC Log Window */
+  .plc-console {
+    background: rgba(0, 0, 0, 0.85);
+    color: #30d158; /* Hacker green text */
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    padding: 1.5rem;
+    border-radius: 24px;
+    height: 180px;
+    overflow-y: auto;
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  }
+  body.dark-mode .plc-console { background: rgba(10, 10, 10, 0.9); border-color: rgba(255,255,255,0.05); }
+
+  /* Chart Container */
+  .chart-box {
+    border-radius: 24px;
+    padding: 1.5rem;
+    height: 180px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  canvas#oeeChart { width: 100% !important; height: 100% !important; }
+
+  /* ── RESULTS & ROI ── */
+  .card h3 { margin-bottom: 1.5rem; font-size: 1.6rem; }
+
+  /* ── AI ASSISTANT ── */
+  .ai-container { height: 650px; display: flex; flex-direction: column; overflow: hidden; border-radius: 36px; }
+  .ai-header { padding: 1.5rem 2rem; background: rgba(255,255,255,0.4); border-bottom: 1px solid rgba(255,255,255,0.4); display: flex; align-items: center; gap: 16px; }
+  body.dark-mode .ai-header { background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.05); }
+  .ai-header .avatar { width: 48px; height: 48px; background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 15px rgba(0, 122, 255, 0.3); }
+  .ai-chat-area { flex: 1; padding: 2rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1.5rem; }
+  .msg { max-width: 80%; padding: 1rem 1.5rem; border-radius: 20px; font-size: 1.05rem; line-height: 1.5; font-weight: 500; }
+  .msg.bot { background: rgba(255,255,255,0.8); border: 1px solid rgba(255,255,255,0.5); align-self: flex-start; border-bottom-left-radius: 4px; color: var(--text-main); box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+  body.dark-mode .msg.bot { background: rgba(40,40,40,0.8); border-color: rgba(255,255,255,0.1); }
+  .msg.user { background: var(--accent-blue); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; box-shadow: 0 4px 15px rgba(0, 122, 255, 0.3); }
+  
+  .ai-input-area { padding: 1.5rem 2rem; border-top: 1px solid rgba(255,255,255,0.4); display: flex; gap: 1rem; background: rgba(255,255,255,0.4); }
+  body.dark-mode .ai-input-area { background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.05); }
+  .ai-input-area input { flex: 1; background: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.8); color: var(--text-main); padding: 14px 20px; border-radius: 16px; font-family: 'Inter', sans-serif; outline: none; font-size: 1.05rem; box-shadow: inset 0 2px 5px rgba(0,0,0,0.02); transition: all 0.3s; }
+  body.dark-mode .ai-input-area input { background: rgba(30,30,30,0.8); border-color: rgba(255,255,255,0.2); }
+  .ai-input-area input:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.2); }
+  .ai-input-area button { background: var(--accent-blue); color: #fff; border: none; padding: 0 2rem; border-radius: 16px; font-weight: 600; font-size: 1.05rem; cursor: pointer; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+  .ai-input-area button:hover { transform: scale(1.05); box-shadow: 0 8px 20px rgba(0, 122, 255, 0.4); }
+
+  .suggested-qs { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .sq-btn { background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.5); color: var(--text-main); font-size: 0.95rem; font-weight: 600; padding: 10px 20px; border-radius: 24px; cursor: pointer; transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: 0 4px 15px rgba(0,0,0,0.04); }
+  body.dark-mode .sq-btn { background: rgba(40,40,40,0.6); border-color: rgba(255,255,255,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+  .sq-btn:hover { color: var(--accent-purple); transform: translateY(-3px) scale(1.02); box-shadow: 0 8px 25px rgba(0,0,0,0.08); background: rgba(255,255,255,0.9); }
+  body.dark-mode .sq-btn:hover { background: rgba(60,60,60,0.8); }
+
+  /* ── FOOTER ── */
+  .foot { text-align: center; padding: 3rem 1rem; color: var(--text-muted); font-weight: 600; font-size: 0.9rem; margin-top: 5rem; border-radius: 40px 40px 0 0; }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 10px; border: 2px solid transparent; background-clip: padding-box; }
+  body.dark-mode ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border: 2px solid transparent; background-clip: padding-box; }
+  
+  /* Console scrollbar */
+  .plc-console::-webkit-scrollbar { width: 6px; }
+  .plc-console::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- Apple Style Mesh Background -->
+<div class="mesh-container"></div>
+
+<!-- NAV -->
+<div style="padding: 12px 20px; position: relative; z-index: 200;">
+<nav>
+  <div style="width: 42px;"></div>
+  <div class="nav-links">
+    <a href="index.html" class="nav-btn" id="nav-home">Home</a>
+    <a href="problem.html" class="nav-btn" id="nav-problem">Problem</a>
+    <a href="objectives.html" class="nav-btn" id="nav-objectives">Objectives</a>
+    <a href="architecture.html" class="nav-btn" id="nav-architecture">Architecture</a>
+    <a href="simulation.html" class="nav-btn" id="nav-simulation">Live Demo</a>
+    <a href="results.html" class="nav-btn" id="nav-results">Results &amp; ROI</a>
+    <a href="tech.html" class="nav-btn" id="nav-tech">Tech Stack</a>
+    <a href="ai-guide.html" class="nav-btn ai-btn" id="nav-ai-guide">🧠 AI Guide</a>
+  </div>
+  <button class="theme-toggle" onclick="toggleDarkMode()" title="Toggle Dark/Light Mode">🌙</button>
+</nav>
+</div>
+
+<!-- PAGE HERO -->
+<div class="page-hero glass-panel">
+  <div class="page-hero-badge"><span class="page-hero-dot"></span>Results &amp; ROI</div>
+  <h2 class="page-hero-title">Performance <em>Metrics</em> Achieved</h2>
+  <p class="page-hero-sub">Quantified outcomes from the Smart Factory Monitor deployment — accuracy, savings, and ROI.</p>
+  <div class="page-hero-pills">
+    <span class="hero-pill">88.5% Pred. Accuracy</span>
+    <span class="hero-pill">✅ 97.2% Simulation</span>
+    <span class="hero-pill">₹60L Annual Savings</span>
+    <span class="hero-pill">7 mo Payback</span>
+  </div>
+</div>
+
+<!-- ══ HOME ══ -->
+<section id="home" class="section active">
+  <div class="hero-glass glass-panel">
+    <div class="hero">
+      <span class="tag">M.Tech · CSE · Mini Project</span>
+      <h1>Simulating the Future of<br><span style="color: var(--accent-blue);">Smart Manufacturing</span></h1>
+      <p>A Smart Factory Monitor framework powered by IoT, Machine Learning, and real-time simulation to transform industrial manufacturing operations across India.</p>
+      <div class="badge-row">
+        <span class="badge">Industry 4.0</span>
+        <span class="badge">Smart Factory Monitor</span>
+        <span class="badge">Predictive Maintenance</span>
+        <span class="badge">IoT</span>
+        <span class="badge">Machine Learning</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-grid">
+    <div class="card glass-panel glass-hover">
+      <span class="icon">🔬</span>
+      <h3>What is a Smart Factory Monitor?</h3>
+      <p>A virtual replica of a physical machine that receives real-time sensor data to simulate, monitor, and predict behavior — without disrupting the real machine.</p>
+    </div>
+    <div class="card glass-panel glass-hover">
+      <span class="icon">🏭</span>
+      <h3>Smart Manufacturing</h3>
+      <p>Factories where machines, sensors, and humans communicate in real-time to automatically detect faults, reduce waste, and improve quality.</p>
+    </div>
+    <div class="card glass-panel glass-hover">
+      <span class="icon">🤖</span>
+      <h3>AI + Simulation</h3>
+      <p>Machine learning models (LSTM, Random Forest) predict failures 48 hours in advance. Auto-simulation adjusts itself continuously as conditions change.</p>
+    </div>
+  </div>
+
+  <!-- Credentials -->
+  <div class="credentials glass-panel glass-hover">
+    <div class="cred-block">
+      <span class="cred-name">B. RAJASEKHAR</span>
+      <span class="cred-role">Student / Principal Developer</span>
+    </div>
+    <div class="cred-block">
+      <span class="cred-name">BVPK AKHIL</span>
+      <span class="cred-role">Project Guide / Supervisor</span>
+    </div>
+    <div class="cred-block">
+      <span class="cred-name">Vijayawada, AP</span>
+      <span class="cred-role">Location · 2026</span>
+    </div>
+  </div>
+</section>
+
+<!-- ══ PROBLEM ══ -->
+<section id="problem" class="section">
+  <div class="sec-title glass-panel">Problem Statement</div>
+  <div class="sec-sub">Current manufacturing systems face critical challenges that this project solves.</div>
+
+  <div class="card-grid" style="grid-template-columns: 1fr;">
+    <div class="problem-item glass-panel glass-hover" style="border-left: 8px solid var(--accent-pink);">
+      <span class="pi">⏱️</span>
+      <div>
+        <h4>High Machine Downtime</h4>
+        <p>Indian MSME industries experience 15–20% average downtime due to unexpected failures. Reactive maintenance causes production delays and increased costs.</p>
+      </div>
+    </div>
+    <div class="problem-item glass-panel glass-hover" style="border-left: 8px solid var(--accent-pink);">
+      <span class="pi">⚡</span>
+      <div>
+        <h4>Inefficient Energy Consumption</h4>
+        <p>Manufacturing facilities waste energy during idle time and non-optimized processes. Lack of real-time monitoring makes it impossible to identify excessive usage.</p>
+      </div>
+    </div>
+    <div class="problem-item glass-panel glass-hover" style="border-left: 8px solid var(--accent-pink);">
+      <span class="pi">🔮</span>
+      <div>
+        <h4>Poor Predictive Capabilities</h4>
+        <p>70% of maintenance is reactive — done only after a failure occurs. Without analytics and ML, factories cannot forecast equipment failures or bottlenecks.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ OBJECTIVES ══ -->
+<section id="objectives" class="section">
+  <div class="sec-title glass-panel">Research Objectives</div>
+  <div class="sec-sub">Primary goals and expected hypotheses for the Indian context.</div>
+
+  <div class="card-grid">
+    <div class="card glass-panel glass-hover">
+      <span class="icon">🧬</span>
+      <h3>Smart Factory Monitor Framework</h3>
+      <p>Build a comprehensive virtual replica of the manufacturing system with real-time synchronization using affordable IoT sensors.</p>
+    </div>
+    <div class="card glass-panel glass-hover">
+      <span class="icon">🔄</span>
+      <h3>Dynamic Auto-Simulation</h3>
+      <p>Automatically simulate real-world behavior as conditions change. Test "what-if" scenarios safely.</p>
+    </div>
+    <div class="card glass-panel glass-hover">
+      <span class="icon">🛠️</span>
+      <h3>Predictive Maintenance</h3>
+      <p>Use LSTM neural networks to detect anomalies and predict failures 48 hours in advance, reducing downtime.</p>
+    </div>
+  </div>
+
+  <div class="metrics-grid">
+    <div class="metric-box glass-panel glass-hover">
+      <span class="val safe">+20%</span>
+      <span class="label">OEE Improvement</span>
+    </div>
+    <div class="metric-box glass-panel glass-hover">
+      <span class="val hot">−40%</span>
+      <span class="label">Downtime Reduction</span>
+    </div>
+    <div class="metric-box glass-panel glass-hover">
+      <span class="val warn">+30%</span>
+      <span class="label">Planning Accuracy</span>
+    </div>
+    <div class="metric-box glass-panel glass-hover">
+      <span class="val hot">18mo</span>
+      <span class="label">ROI Target</span>
+    </div>
+  </div>
+</section>
+
+<!-- ══ ARCHITECTURE ══ -->
+<section id="architecture" class="section">
+  <div class="sec-title glass-panel">System Architecture</div>
+  <div class="sec-sub">4-layer enterprise design pattern.</div>
+
+  <div style="max-width: 800px; margin: 0 auto;">
+    <div class="arch-layer glass-panel glass-hover">
+      <span class="al-icon" style="color: var(--accent-blue);">📺</span>
+      <span class="al-name">UI LAYER</span>
+      <span class="al-desc">Web Dashboard & API Gateway</span>
+    </div>
+    <div class="arch-layer glass-panel glass-hover">
+      <span class="al-icon" style="color: var(--accent-purple);">🧠</span>
+      <span class="al-name">APPLICATION LAYER</span>
+      <span class="al-desc">Smart Factory Monitor Engine & ML Analytics</span>
+    </div>
+    <div class="arch-layer glass-panel glass-hover">
+      <span class="al-icon" style="color: var(--accent-green);">⚙️</span>
+      <span class="al-name">DATA LAYER</span>
+      <span class="al-desc">Stream Processor & Time-series DB</span>
+    </div>
+    <div class="arch-layer glass-panel glass-hover">
+      <span class="al-icon" style="color: var(--accent-pink);">🏭</span>
+      <span class="al-name">PHYSICAL LAYER</span>
+      <span class="al-desc">Sensors, PLCs, and Actuators on Shop Floor</span>
+    </div>
+  </div>
+</section>
+
+<!-- ══ LIVE SIMULATION ══ -->
+<section id="simulation" class="section">
+  <div class="sec-title glass-panel">Cyber-Physical Stage Live Demo</div>
+  <div class="sec-sub">Real-time simulation of production belt, edge synchronization, and AI predictive maintenance sorting.</div>
+
+  <div class="sim-panel glass-panel">
+    
+    <div id="status-text" class="status-bar status-ok glass-panel">✅ SYSTEM HEALTHY & SYNCHRONIZED</div>
+
+    <!-- The Animated Conveyor Stage -->
+    <div class="stage-container">
+      
+      <!-- Main Stage -->
+      <div class="stage-main glass-panel" id="stage-area">
+        <div class="sensor-beam"></div>
+        <div id="actuator-arm"></div>
+        <div id="workpiece">U-0</div>
+        <div id="target-lock">[ SCAN ]</div>
+        <div class="conveyor-belt"></div>
+      </div>
+      
+      <!-- Side Data Panels -->
+      <div class="stage-side">
+        <div class="mini-sensor">
+          <span class="s-label">Temperature</span>
+          <span class="s-val" id="temp-val" style="color: var(--accent-blue);">--°C</span>
+        </div>
+        <div class="mini-sensor">
+          <span class="s-label">Vibration</span>
+          <span class="s-val" id="vib-val" style="color: var(--accent-amber);">--mm/s</span>
+        </div>
+      </div>
+      
+    </div>
+
+    <!-- Charts and Logs -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+      <div class="plc-console" id="plc-log">
+        >> Initializing Industry 4.0 Smart Factory Monitor...<br>
+        >> Connecting to OPC UA Server...<br>
+        >> Synchronization complete.<br>
+      </div>
+      
+      <div class="chart-box glass-panel">
+        <canvas id="oeeChart"></canvas>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══ RESULTS & ROI ══ -->
+<section id="results" class="section">
+  <div class="sec-title glass-panel">Results & Economic Analysis</div>
+  <div class="sec-sub">Performance metrics achieved and cost-benefit analysis in INR (₹).</div>
+
+  <div class="metrics-grid">
+    <div class="metric-box glass-panel glass-hover">
+      <span class="val">88.5%</span>
+      <span class="label">Predictive Accuracy</span>
+    </div>
+    <div class="metric-box glass-panel glass-hover">
+      <span class="val safe">97.2%</span>
+      <span class="label">Simulation Accuracy</span>
+    </div>
+    <div class="metric-box glass-panel glass-hover">
+      <span class="val hot">&lt;1s</span>
+      <span class="label">Sync Latency</span>
+    </div>
+    <div class="metric-box glass-panel glass-hover">
+      <span class="val" id="roi-uptime">99.9%</span>
+      <span class="label">System Uptime</span>
+    </div>
+  </div>
+
+  <div class="card glass-panel" style="margin-top: 2rem;">
+    <h3 style="margin-bottom: 1.5rem; font-size: 1.6rem;">Indian Manufacturing ROI Projections</h3>
+    <div class="metrics-grid" style="margin-top:0;">
+      <div class="metric-box" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4); border-radius: 20px; box-shadow: none;">
+        <span class="val warn">₹35L</span>
+        <span class="label">Initial Setup & Sensors</span>
+      </div>
+      <div class="metric-box" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4); border-radius: 20px; box-shadow: none;">
+        <span class="val safe" id="roi-savings">₹60.0L</span>
+        <span class="label">Est. Annual Savings</span>
+      </div>
+      <div class="metric-box" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4); border-radius: 20px; box-shadow: none;">
+        <span class="val hot" id="roi-payback">7.0 mo</span>
+        <span class="label">Payback Period</span>
+      </div>
+      <div class="metric-box" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4); border-radius: 20px; box-shadow: none;">
+        <span class="val" id="roi-total">435%</span>
+        <span class="label">ROI (Over 3 Years)</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ TECH STACK ══ -->
+<section id="tech" class="section">
+  <div class="sec-title glass-panel">Technology Stack</div>
+  <div class="sec-sub">Modern tools utilized for the implementation.</div>
+
+  <div class="card-grid">
+    <div class="card glass-panel glass-hover" style="border-top: 6px solid var(--accent-blue);">
+      <h3>Frontend & UI</h3>
+      <span class="tech-tag">HTML5 / CSS3</span>
+      <span class="tech-tag">Vanilla JS</span>
+      <span class="tech-tag">Chart.js</span>
+    </div>
+    <div class="card glass-panel glass-hover" style="border-top: 6px solid var(--accent-green);">
+      <h3>Backend & Data</h3>
+      <span class="tech-tag">Python Flask</span>
+      <span class="tech-tag">Node.js</span>
+      <span class="tech-tag">MongoDB</span>
+      <span class="tech-tag">AWS IoT</span>
+    </div>
+    <div class="card glass-panel glass-hover" style="border-top: 6px solid var(--accent-purple);">
+      <h3>Machine Learning</h3>
+      <span class="tech-tag">TensorFlow</span>
+      <span class="tech-tag">LSTM Networks</span>
+      <span class="tech-tag">Scikit-learn</span>
+    </div>
+  </div>
+</section>
+
+<!-- ══ AI ASSISTANT ══ -->
+<section id="ai-guide" class="section">
+  <div class="sec-title glass-panel">🧠 Project AI Assistant</div>
+  <div class="sec-sub">Ask the AI questions about B. RAJASEKHAR's Smart Factory Monitor project.</div>
+
+  <div class="suggested-qs">
+    <button class="sq-btn" onclick="setAiInput('What is the core objective of this project?')">Project Objective?</button>
+    <button class="sq-btn" onclick="setAiInput('Explain the ML Models used.')">ML Models?</button>
+    <button class="sq-btn" onclick="setAiInput('How does this benefit Indian manufacturing?')">Indian Manufacturing ROI?</button>
+  </div>
+
+  <div class="ai-container glass-panel">
+    <div class="ai-header">
+      <div class="avatar">🧠</div>
+      <div>
+        <div style="font-weight: 800; font-family: 'Outfit'; color: var(--text-main); font-size: 1.2rem; letter-spacing: -0.5px;">TwinAI Guide</div>
+        <div style="font-size: 0.85rem; color: var(--accent-green); font-weight: 700;">Online</div>
+      </div>
+    </div>
+    
+    <div class="ai-chat-area" id="chatArea">
+      <div class="msg bot">
+        Hello! I am the AI Guide for B. RAJASEKHAR's Smart Factory Monitor project (supervised by BVPK AKHIL). How can I assist you with the architecture, ROI, or implementation details today?
+      </div>
+    </div>
+
+    <div class="ai-input-area">
+      <input type="text" id="aiInput" placeholder="Ask a question..." onkeypress="handleAiEnter(event)">
+      <button onclick="sendAiMsg()">Send</button>
+    </div>
+  </div>
+</section>
+
+<div class="foot glass-panel">
+  SIMULATING THE FUTURE OF SMART MANUFACTURING &nbsp;·&nbsp; B. RAJASEKHAR &nbsp;·&nbsp; M.TECH CSE &nbsp;·&nbsp; VIJAYAWADA 2026
+</div>
+
+<script>
+// ── Theme Toggling ──
+let isDarkMode = false;
+let oeeChartInstance = null;
+
+if(localStorage.getItem('theme') === 'dark') {
+    document.body.classList.add('dark-mode');
+    isDarkMode = true;
+    document.addEventListener("DOMContentLoaded", () => {
+        const toggleBtn = document.querySelector('.theme-toggle');
+        if(toggleBtn) toggleBtn.textContent = '☀️';
+    });
+}
+
+function toggleDarkMode() {
+  const body = document.body;
+  const toggleBtn = document.querySelector('.theme-toggle');
+  
+  if (isDarkMode) {
+    body.classList.remove('dark-mode');
+    toggleBtn.textContent = '🌙';
+    isDarkMode = false;
+    localStorage.setItem('theme', 'light');
+  } else {
+    body.classList.add('dark-mode');
+    toggleBtn.textContent = '☀️';
+    isDarkMode = true;
+    localStorage.setItem('theme', 'dark');
+  }
+  
+  if(typeof oeeChartInstance !== 'undefined' && oeeChartInstance) updateChartTheme();
+}
+
+// ── Navigation ──
+function show(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav .nav-btn').forEach(b => b.classList.remove('active'));
+  
+  const sec = document.getElementById(id);
+  if(sec) sec.classList.add('active');
+  
+  const btn = document.getElementById('nav-' + id);
+  if(btn) btn.classList.add('active');
+  
+  if(id === 'simulation' && typeof initChart === 'function' && !oeeChartInstance) {
+    initChart();
+  }
+}
+window.addEventListener('DOMContentLoaded', () => { show('results'); });
+
+// ── CYBER-PHYSICAL STAGE LOGIC ──
+const config = { speed: 6 };
+const dom = {
+  stage: document.getElementById('stage-area'),
+  wp: document.getElementById('workpiece'),
+  arm: document.getElementById('actuator-arm'),
+  log: document.getElementById('plc-log'),
+  status: document.getElementById('status-text'),
+  temp: document.getElementById('temp-val'),
+  vib: document.getElementById('vib-val')
+};
+
+let workpieceCount = 0;
+
+function logPLC(msg) {
+  dom.log.innerHTML += `<div>${msg}</div>`;
+  dom.log.scrollTop = dom.log.scrollHeight;
+}
+
+function startCycle() {
+  workpieceCount++;
+  let pos = -100;
+  let isFaulty = Math.random() > 0.75; // 25% chance of fault
+  
+  dom.wp.innerText = `U-${workpieceCount}`;
+  dom.wp.style.left = pos + 'px';
+  dom.wp.style.transform = "translateY(0) scale(1) rotate(0deg)";
+  dom.wp.style.borderColor = "var(--accent-blue)";
+  dom.wp.style.boxShadow = "0 0 20px var(--accent-blue), inset 0 0 15px var(--accent-blue)";
+  dom.wp.style.opacity = "1";
+  
+  const targetLock = document.getElementById('target-lock');
+  if(targetLock) {
+    targetLock.innerText = `[ TRACKING U-${workpieceCount} ]`;
+    targetLock.style.color = "var(--accent-blue)";
+    targetLock.style.textShadow = "0 0 5px var(--accent-blue)";
+  }
+
+  const stageWidth = dom.stage.offsetWidth || 800;
+  const triggerPoint = (stageWidth / 2) - 30; 
+
+  const loop = setInterval(() => {
+      pos += config.speed;
+      dom.wp.style.left = pos + 'px';
+      if(targetLock) targetLock.style.left = (pos - 15) + 'px';
+
+      // Simulate Live IoT Data 
+      const t = (isFaulty && pos > triggerPoint - 120 ? 75 + Math.random()*10 : 60 + Math.random()*5).toFixed(1);
+      const v = (isFaulty && pos > triggerPoint - 120 ? 4.5 + Math.random()*2 : 1.1 + Math.random()*0.5).toFixed(2);
+      
+      dom.temp.innerText = t + "°C";
+      dom.vib.innerText = v + "mm/s";
+
+      if(t > 70) dom.temp.style.color = "var(--accent-pink)";
+      else dom.temp.style.color = "var(--accent-blue)";
+      
+      if(v > 4.0) dom.vib.style.color = "var(--accent-pink)";
+      else dom.vib.style.color = "var(--accent-amber)";
+
+      // PRECISION SENSOR TRIGGER
+      if (pos >= triggerPoint && pos <= triggerPoint + config.speed) {
+          if (isFaulty) {
+              executeRejection();
+              if(targetLock) {
+                  targetLock.innerText = `[ ANOMALY ]`;
+                  targetLock.style.color = "var(--accent-pink)";
+                  targetLock.style.textShadow = "0 0 5px var(--accent-pink)";
+              }
+          } else {
+              logPLC(`>> U-${workpieceCount}: Quality Verified. Sensor clear.`);
+              if(targetLock) {
+                  targetLock.innerText = `[ VERIFIED ]`;
+                  targetLock.style.color = "var(--accent-green)";
+                  targetLock.style.textShadow = "0 0 5px var(--accent-green)";
+              }
+          }
+      }
+
+      // Recycle Product
+      if (pos > stageWidth + 100) {
+          clearInterval(loop);
+          resetHMI();
+          setTimeout(startCycle, 1000);
+      }
+  }, 20);
+}
+
+function executeRejection() {
+  logPLC(`<span style="color: var(--accent-pink);">>> ANOMALY DETECTED: Activating Piston Sorter</span>`);
+  dom.status.innerHTML = "⚠ PREDICTIVE FAULT DETECTED";
+  dom.status.className = 'status-bar status-warn glass-panel';
+  
+  // Synchronized Robotic Smash Actuation
+  dom.arm.classList.add('actuating');
+  
+  setTimeout(() => {
+      // Workpiece gets crushed and spins out
+      dom.wp.style.borderColor = "var(--accent-pink)";
+      dom.wp.style.boxShadow = "0 0 40px var(--accent-pink), inset 0 0 30px var(--accent-pink)";
+      dom.wp.style.transform = "translateY(80px) scale(0.4) rotate(270deg)";
+      dom.wp.style.opacity = "0";
+  }, 150);
+
+  setTimeout(() => dom.arm.classList.remove('actuating'), 500);
+}
+
+function resetHMI() {
+  dom.status.innerHTML = "✅ SYSTEM HEALTHY & SYNCHRONIZED";
+  dom.status.className = 'status-bar status-ok glass-panel';
+}
+
+// Start simulation immediately
+window.onload = startCycle;
+
+// ── Chart.js (OEE Chart) ──
+function initChart() {
+  const ctx = document.getElementById('oeeChart').getContext('2d');
+  
+  const style = getComputedStyle(document.body);
+  const gridColor = style.getPropertyValue('--chart-grid').trim() || 'rgba(0,0,0,0.05)';
+  const textColor = style.getPropertyValue('--text-muted').trim() || '#8e8e93';
+  const lineColor = style.getPropertyValue('--accent-blue').trim() || '#007aff';
+  const bgColor = style.getPropertyValue('--chart-bg-start').trim() || 'rgba(0, 122, 255, 0.2)';
+
+  oeeChartInstance = new Chart(ctx, {
+      type: 'line',
+      data: { 
+        labels: ['','','','','','','','','',''], 
+        datasets: [{ 
+          label: 'Overall Equipment Effectiveness (OEE %)', 
+          data: Array(10).fill(89), 
+          borderColor: lineColor, 
+          backgroundColor: bgColor,
+          borderWidth: 3,
+          fill: true,
+          tension: 0.4,
+          pointRadius: 0
+        }] 
+      },
+      options: { 
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { 
+          legend: { 
+            labels: { color: textColor, font: { family: 'Inter', weight: 600 } } 
+          } 
+        }, 
+        scales: { 
+          y: { 
+            min: 80, max: 100, 
+            grid: { color: gridColor }, 
+            ticks: { color: textColor } 
+          },
+          x: { 
+            grid: { display: false }, 
+            ticks: { display: false } 
+          }
+        } 
+      }
+  });
+
+  setInterval(() => {
+      oeeChartInstance.data.datasets[0].data.shift();
+      oeeChartInstance.data.datasets[0].data.push(88 + Math.random()*5);
+      oeeChartInstance.update('none');
+  }, 1500);
+}
+
+function updateChartTheme() {
+  if(!oeeChartInstance) return;
+  const style = getComputedStyle(document.body);
+  const gridColor = style.getPropertyValue('--chart-grid').trim();
+  const textColor = style.getPropertyValue('--text-muted').trim();
+
+  oeeChartInstance.options.scales.y.grid.color = gridColor;
+  oeeChartInstance.options.scales.y.ticks.color = textColor;
+  oeeChartInstance.options.plugins.legend.labels.color = textColor;
+  oeeChartInstance.update();
+}
+
+// ── AI Assistant Logic ──
+function setAiInput(text) {
+  document.getElementById('aiInput').value = text;
+  sendAiMsg();
+}
+
+function handleAiEnter(e) {
+  if(e.key === 'Enter') sendAiMsg();
+}
+
+function sendAiMsg() {
+  const input = document.getElementById('aiInput');
+  const text = input.value.trim();
+  if(!text) return;
+
+  const chat = document.getElementById('chatArea');
+  
+  const uMsg = document.createElement('div');
+  uMsg.className = 'msg user';
+  uMsg.textContent = text;
+  chat.appendChild(uMsg);
+  input.value = '';
+  chat.scrollTop = chat.scrollHeight;
+
+  setTimeout(() => {
+    const bMsg = document.createElement('div');
+    bMsg.className = 'msg bot';
+    
+    const lower = text.toLowerCase();
+    let reply = "That's a great question regarding the Smart Factory Monitor system. B. RAJASEKHAR and guide BVPK AKHIL designed this system to be highly adaptable to various manufacturing scenarios.";
+    
+    if(lower.includes('objective')) {
+      reply = "The core objective is to reduce machine downtime and optimize energy consumption in Indian manufacturing by implementing a real-time Smart Factory Monitor with predictive maintenance capabilities.";
+    } else if(lower.includes('ml') || lower.includes('model')) {
+      reply = "The project utilizes LSTM (Long Short-Term Memory) neural networks for time-series forecasting of sensor data, and Random Forest classifiers for anomaly detection.";
+    } else if(lower.includes('roi') || lower.includes('india')) {
+      reply = "For Indian MSMEs, the estimated setup cost is around ₹35 Lakhs. With an estimated annual savings of ₹60 Lakhs via downtime reduction, the payback period is exceptionally fast at ~7 months.";
+    }
+
+    bMsg.textContent = reply;
+    chat.appendChild(bMsg);
+    chat.scrollTop = chat.scrollHeight;
+  }, 800);
+}
+
+// ── Live ROI Sync ──
+function updateROIPanel(data) {
+  if(!data) return;
+  const uptimeEl = document.getElementById('roi-uptime');
+  const savingsEl = document.getElementById('roi-savings');
+  const paybackEl = document.getElementById('roi-payback');
+  const totalEl = document.getElementById('roi-total');
+
+  if(uptimeEl) uptimeEl.innerText = data.uptime;
+  if(savingsEl) savingsEl.innerText = data.savings;
+  if(paybackEl) paybackEl.innerText = data.payback;
+  if(totalEl) totalEl.innerText = data.roi;
+
+  // Change colors dynamically based on live simulation health
+  const uptimeVal = parseFloat(data.uptime);
+  if(uptimeEl) {
+      if(uptimeVal < 90) uptimeEl.className = 'val warn';
+      else if(uptimeVal < 95) uptimeEl.className = 'val hot';
+      else uptimeEl.className = 'val safe';
+  }
+
+  const savingsVal = parseFloat(data.savings.replace(/[^0-9.]/g, ''));
+  if(savingsEl) {
+      if(savingsVal > 55) savingsEl.className = 'val safe';
+      else if(savingsVal > 40) savingsEl.className = 'val hot';
+      else savingsEl.className = 'val warn';
+  }
+}
+
+window.addEventListener('storage', (e) => {
+  if (e.key === 'sim_roi_sync' && e.newValue) {
+    updateROIPanel(JSON.parse(e.newValue));
+  }
+});
+
+function pollROI() {
+  const data = localStorage.getItem('sim_roi_sync');
+  if(data) updateROIPanel(JSON.parse(data));
+}
+pollROI();
+setInterval(pollROI, 1000);
+</script>
+</body>
+</html>
